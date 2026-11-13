@@ -91,8 +91,22 @@ If the kill switch fires: keep whatever runs, record it, and the time goes to WE
 | PLAN-1 | Review and merge PRs quickly (target: under 20 minutes). A waiting PR blocks an agent |
 | PLAN-2 | Verify the challenge Resources tab and what NASA OSDR actually offers; feed ENGINE-6 |
 | PLAN-3 | `docs/sources.md` and the "NASA data used" + "AI use" sections of the submission (AI used to build it, AI inside it) |
-| PLAN-4 | Demo video script from architecture section 5; rehearse twice on the deployed link |
-| PLAN-5 | Submission page: title, summary, links, team |
+
+## PITCH (`pitch/`): @Tu2525 and @m7mdnasrr
+
+Rules and folder layout: `pitch/README.md`.
+
+| ID | Task | Done when |
+|---|---|---|
+| PITCH-1 | Travel case | scope to be confirmed by @Tu2525 |
+| PITCH-2 | PowerPoint deck: problem, the five hazards, demo story, architecture in one slide, data honesty, AI use, team | `pitch/deck/deck-v1.pptx` + exported PDF; outline by M2, real screenshots by M4 |
+| PITCH-3 | Brag video: short launch video of the product | `pitch/brag/`; needs the deployed link (after M4) |
+| PITCH-4 | PDFs: one-pager and project summary for the submission | `pitch/pdf/` |
+| PITCH-5 | Demo video script from architecture section 5; rehearse twice on the deployed link; record | by M5 |
+| PITCH-6 | Submission page: title, summary, links, team | by T+46 |
+| PITCH-7 | Extra or shortened presentations for live judging | stretch |
+
+Start the deck outline and the video script now; they do not depend on code. Screenshots and recordings wait for M3 and M4.
 
 ## Cut lines (in this order)
 

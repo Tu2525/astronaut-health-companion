@@ -27,6 +27,7 @@ The 48-hour clock is running. Read this file, then the `AGENTS.md` in your own f
 | **WEB** | `apps/web` except `src/contract` and `src/faces/ground` |
 | **SAFE** | `apps/egui`, `apps/desktop` |
 | **MOBILE** | `apps/mobile` (and `crates/core-ffi` only if the on-device engine stretch is started) |
+| **PITCH** | `pitch/` (deck, PDFs, brag video, travel case) |
 | **PLANNER** | root files, `docs/`, `design/`, `.github/` |
 
 Root `Cargo.toml`: each owner may add **only their own crate** to `members`, nothing else.
@@ -36,7 +37,7 @@ People, decisions and cover are in `TEAM.md`. Drivers: put your GitHub handle th
 
 - **One worktree per agent**, so nobody overwrites anybody's uncommitted files:
   `git worktree add ../ahc-<area> -b <area>/<topic> origin/main`
-- **Branches:** `<area>/<short-topic>`, area is one of `core api web ground egui desktop mobile docs ci`. Example: `web/body-figure`.
+- **Branches:** `<area>/<short-topic>`, area is one of `core api web ground egui desktop mobile pitch docs ci`. Example: `web/body-figure`.
 - **Never push to `main`.** Everything lands through a PR reviewed by @Tu2525.
 - **One feature or one fix per PR.** Small (aim under ~400 changed lines; generated files do not count). If you did two things, open two PRs.
 - **Rebase on `origin/main` before opening a PR and whenever main moves.** Never force-push someone else's branch.

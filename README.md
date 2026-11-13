@@ -27,6 +27,7 @@ crates/api         "Ground Station" backend (axum)            [to build]
 apps/web           Crew App + Ground Station (React)           [to build]
 apps/egui          Safe-Mode Console, native + WASM            [to build]
 apps/desktop       Tauri shell                                 [to build]
+pitch              deck, PDFs, brag video, travel case         [to build]
 apps/mobile        React Native companion                      [to build]
 ```
 
