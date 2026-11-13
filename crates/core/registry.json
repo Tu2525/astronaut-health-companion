@@ -1,0 +1,143 @@
+[
+  {
+    "id": "heart_rate", "name": "Resting heart rate", "unit": "bpm", "alt_units": [],
+    "region": "heart", "hazards": ["gravity", "isolation", "closed_environment"],
+    "what": "How many times your heart beats per minute at rest.",
+    "why_in_space": "Fluid shifts toward the head and the heart works differently without gravity. Stress and poor sleep also raise resting heart rate.",
+    "how_to_measure": ["Rest for 5 minutes, restrained and still.", "Wear the chest strap or use the pulse oximeter.", "Record the value after it settles for 30 seconds."],
+    "expected_change": "A small change in resting heart rate in the first weeks of flight is a normal adaptation.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 50, "nominal_high": 100, "caution_low": 40, "caution_high": 130 } }],
+    "watch_drift_pct": 10, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "hr_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null },
+      { "id": "hr_hydrate", "text": "Drink one electrolyte drink.", "kit_item": "electrolyte_drink" }
+    ]
+  },
+  {
+    "id": "bp_systolic", "name": "Blood pressure (systolic)", "unit": "mmHg", "alt_units": [],
+    "region": "heart", "hazards": ["gravity", "isolation", "closed_environment"],
+    "what": "The pressure in your arteries when the heart beats.",
+    "why_in_space": "Fluid shift, altered gravity, sleep debt and stress all affect blood pressure.",
+    "how_to_measure": ["Rest for 5 minutes.", "Anchor your arm at heart level; in microgravity it will float.", "Fit the cuff on the bare upper arm and start the monitor.", "Stay still and silent until it finishes."],
+    "expected_change": "Blood pressure often runs slightly lower in microgravity than on Earth.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 90, "nominal_high": 130, "caution_low": 80, "caution_high": 160 } }],
+    "watch_drift_pct": 10, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "bp_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null },
+      { "id": "bp_hydrate", "text": "Drink one electrolyte drink.", "kit_item": "electrolyte_drink" },
+      { "id": "bp_sleep", "text": "Protect tonight's sleep block: no late tasks, use the sleep mask.", "kit_item": null }
+    ]
+  },
+  {
+    "id": "bp_diastolic", "name": "Blood pressure (diastolic)", "unit": "mmHg", "alt_units": [],
+    "region": "heart", "hazards": ["gravity", "isolation", "closed_environment"],
+    "what": "The pressure in your arteries between heartbeats.",
+    "why_in_space": "Fluid shift, altered gravity, sleep debt and stress all affect blood pressure.",
+    "how_to_measure": ["Measured together with systolic pressure by the cuff."],
+    "expected_change": null,
+    "ranges": [{ "env": null, "bands": { "nominal_low": 60, "nominal_high": 85, "caution_low": 50, "caution_high": 100 } }],
+    "watch_drift_pct": 12, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [{ "id": "bpd_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null }]
+  },
+  {
+    "id": "body_temp", "name": "Body temperature", "unit": "°C",
+    "alt_units": [{ "unit": "°F", "factor": 1.8, "offset": 32 }],
+    "region": "immune", "hazards": ["closed_environment", "radiation"],
+    "what": "Your core temperature, a quick sign of infection or heat stress.",
+    "why_in_space": "The immune system changes in flight and a closed cabin spreads germs easily.",
+    "how_to_measure": ["Use the thermometer as its card shows.", "Wait 15 minutes after exercise, food or drink."],
+    "expected_change": "Core temperature can run slightly higher during long missions.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 36.1, "nominal_high": 37.5, "caution_low": 35.0, "caution_high": 38.5 } }],
+    "watch_drift_pct": 2, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "temp_cool", "text": "Apply a cold pack and rest.", "kit_item": "cold_pack" },
+      { "id": "temp_recheck", "text": "Recheck in 1 hour.", "kit_item": null }
+    ]
+  },
+  {
+    "id": "blood_glucose", "name": "Blood glucose", "unit": "mg/dL",
+    "alt_units": [{ "unit": "mmol/L", "factor": 0.0555, "offset": 0 }],
+    "region": "gut", "hazards": ["closed_environment", "distance"],
+    "what": "The amount of sugar in your blood: your body's fuel level.",
+    "why_in_space": "A limited food system and changed metabolism make nutrition a tracked risk on long missions.",
+    "how_to_measure": ["Wash and dry your hands.", "Use the lancet and place the drop on the strip.", "Note whether you ate in the last 2 hours."],
+    "expected_change": null,
+    "ranges": [{ "env": null, "bands": { "nominal_low": 70, "nominal_high": 140, "caution_low": 54, "caution_high": 250 } }],
+    "watch_drift_pct": 20, "stale_after_h": 60,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "glu_tabs", "text": "If low: take glucose tabs as the kit card says, recheck in 15 minutes.", "kit_item": "glucose_tabs" },
+      { "id": "glu_meal", "text": "Eat your scheduled meal; do not skip it.", "kit_item": null }
+    ]
+  },
+  {
+    "id": "spo2", "name": "Blood oxygen (SpO2)", "unit": "%", "alt_units": [],
+    "region": "lungs", "hazards": ["closed_environment"],
+    "what": "How much oxygen your blood is carrying.",
+    "why_in_space": "Cabin air is recycled; CO2 build-up or a life-support fault shows up in the crew first.",
+    "how_to_measure": ["Warm your finger.", "Clip the pulse oximeter on and hold still for 30 seconds."],
+    "expected_change": null,
+    "ranges": [{ "env": null, "bands": { "nominal_low": 95, "nominal_high": 100, "caution_low": 90, "caution_high": 100 } }],
+    "watch_drift_pct": 3, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general adult clinical range. Replace with NASA-STD-3001 / HRP evidence report.", "url": null, "status": "placeholder" },
+    "actions": [{ "id": "spo2_air", "text": "Move to a well-ventilated module, check the cabin CO2 reading, recheck.", "kit_item": null }]
+  },
+  {
+    "id": "sleep_hours", "name": "Sleep", "unit": "h", "alt_units": [],
+    "region": "head", "hazards": ["isolation", "distance"],
+    "what": "Hours slept in the last sleep period.",
+    "why_in_space": "No day-night cycle, noise, workload and shifted schedules cut sleep. Sleep debt affects mood, heart and performance.",
+    "how_to_measure": ["Log when you fell asleep and woke, or sync your wearable."],
+    "expected_change": "Crews commonly sleep less in flight than on Earth.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 6, "nominal_high": 9, "caution_low": 4, "caution_high": 11 } }],
+    "watch_drift_pct": 10, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: general sleep guidance. Replace with HRP sleep-loss evidence report.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "sleep_mask", "text": "Use the sleep mask and dim the cabin 1 hour before sleep.", "kit_item": "sleep_mask" },
+      { "id": "sleep_block", "text": "Protect an 8-hour sleep block tonight.", "kit_item": null }
+    ]
+  },
+  {
+    "id": "mood", "name": "Mood", "unit": "/5", "alt_units": [],
+    "region": "mind", "hazards": ["isolation", "distance"],
+    "what": "How you feel today, from 1 (very low) to 5 (very good).",
+    "why_in_space": "Isolation, confinement and distance from home are a named NASA hazard for behavioural health.",
+    "how_to_measure": ["Answer the daily check-in honestly. Only you and the flight surgeon see it."],
+    "expected_change": "Mood often dips around the middle of a long mission.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 3, "nominal_high": 5, "caution_low": 1, "caution_high": 5 } }],
+    "watch_drift_pct": 20, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: self-report scale, not a clinical instrument.", "url": null, "status": "placeholder" },
+    "actions": [
+      { "id": "mood_talk", "text": "Talk to a crewmate you trust.", "kit_item": null },
+      { "id": "mood_private", "text": "Request a private conference with ground.", "kit_item": null }
+    ]
+  },
+  {
+    "id": "stress", "name": "Stress", "unit": "/5", "alt_units": [],
+    "region": "mind", "hazards": ["isolation", "distance"],
+    "what": "How calm you feel today, from 1 (very stressed) to 5 (calm).",
+    "why_in_space": "High workload and confinement raise stress, which also affects sleep and the heart.",
+    "how_to_measure": ["Answer the daily check-in."],
+    "expected_change": null,
+    "ranges": [{ "env": null, "bands": { "nominal_low": 3, "nominal_high": 5, "caution_low": 1, "caution_high": 5 } }],
+    "watch_drift_pct": 20, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER: self-report scale, not a clinical instrument.", "url": null, "status": "placeholder" },
+    "actions": [{ "id": "stress_break", "text": "Take a 10-minute break and do the breathing exercise.", "kit_item": null }]
+  },
+  {
+    "id": "radiation_dose", "name": "Radiation dose rate", "unit": "mSv/day", "alt_units": [],
+    "region": "skin", "hazards": ["radiation"],
+    "what": "How much radiation your personal dosimeter recorded in the last day.",
+    "why_in_space": "Outside Earth's magnetic field, cosmic rays and solar storms raise long-term cancer and tissue risk.",
+    "how_to_measure": ["Read the daily value from your personal dosimeter.", "During a solar storm alert, move to the shelter first."],
+    "expected_change": "A steady background dose is expected in deep space.",
+    "ranges": [{ "env": null, "bands": { "nominal_low": 0, "nominal_high": 3, "caution_low": 0, "caution_high": 10 } }],
+    "watch_drift_pct": 50, "stale_after_h": 36,
+    "source": { "citation": "PLACEHOLDER limits. Simulated dosimeter; magnitude to be shaped by published transit measurements (verify and cite).", "url": null, "status": "placeholder" },
+    "actions": [{ "id": "rad_shelter", "text": "Move to the shielded area and limit time near the hull.", "kit_item": null }]
+  }
+]

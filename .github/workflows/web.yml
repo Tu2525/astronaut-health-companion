@@ -1,0 +1,54 @@
+name: web
+on:
+  pull_request:
+    paths: &paths
+      - "apps/web/**"
+      - "crates/core/**"
+      - "crates/core-wasm/**"
+      - ".github/workflows/web.yml"
+  push:
+    branches: [main]
+    paths: *paths
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check apps/web exists
+        id: guard
+        run: |
+          if [ -f apps/web/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.guard.outputs.exists == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - if: steps.guard.outputs.exists == 'true'
+        uses: Swatinem/rust-cache@v2
+      - if: steps.guard.outputs.exists == 'true'
+        uses: jetli/wasm-pack-action@v0.4.0
+      - if: steps.guard.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/web
+        run: npm ci
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/web
+        run: npm run engine
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/web
+        run: npm run lint
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/web
+        run: npm run build
+      - if: steps.guard.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist

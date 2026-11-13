@@ -1,0 +1,50 @@
+name: mobile
+# TODO(mobile owner): add the flutter_rust_bridge codegen step before `flutter pub get`/build once the bridge exists.
+on:
+  pull_request:
+    paths: &paths
+      - "apps/mobile/**"
+      - "crates/core/**"
+      - "crates/core-ffi/**"
+      - ".github/workflows/mobile.yml"
+  push:
+    branches: [main]
+    paths: *paths
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check apps/mobile exists
+        id: guard
+        run: |
+          if [ -f apps/mobile/pubspec.yaml ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.guard.outputs.exists == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - if: steps.guard.outputs.exists == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,x86_64-linux-android
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/mobile
+        run: flutter pub get
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/mobile
+        run: flutter analyze
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/mobile
+        run: flutter test
+      - if: steps.guard.outputs.exists == 'true'
+        working-directory: apps/mobile
+        run: flutter build apk --debug
+      - if: steps.guard.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-debug-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
