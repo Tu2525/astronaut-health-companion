@@ -13,7 +13,7 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 | **WEB** |@AMRYB | NA | The hero Crew App: body figure, measure, guidance, today, crew, comms, trends, library, settings. The public demo link looking good | `apps/web` (except ENGINE's two folders and `public/safe/`) | WEB-1..13 |
 | **SAFE** | @SamaWaheed | NA | Safe-Mode Console (native + `/safe/` in the browser), Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..6 |
 | **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
-| **DEVOPS** | @Tu2525, @m7mdnasrr | NA | CI, deploys and keeping it up: GitHub Actions, the public web link (Pages, includes `/safe/`), the API on the VM, secrets, repo settings | `.github/`, `deploy/` | DEVOPS-1..6 |
+| **DEVOPS** | @Tu2525, @m7mdnasrr | NA | CI, deploys and keeping it up: GitHub Actions, the public web link (Cloudflare Pages, includes `/safe/`), the API on the VM, secrets, repo settings | `.github/`, `deploy/` | DEVOPS-1..6 |
 | **PITCH** | @Tu2525, @m7mdnasrr | NA | Everything judges see besides the product: travel case, PowerPoint deck, brag video, PDFs and presentations, demo video, submission page | `pitch/` | PITCH-1..7 |
 
 @AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
@@ -34,7 +34,7 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 
 | Job | Owner | Helps |
 |---|---|---|
-| Deployed web link (GitHub Pages, includes `/safe/`) | DEVOPS | WEB and SAFE supply working build commands |
+| Deployed web link (Cloudflare Pages, includes `/safe/`) | DEVOPS | WEB and SAFE supply working build commands |
 | Deployed API (Oracle VM) | DEVOPS | ENGINE supplies the binary and its env vars |
 | CI staying green and fast | DEVOPS | each owner fixes failures in their own code |
 | The web build step that pulls in the safe-mode WASM | WEB (their `package.json`) | SAFE supplies the command |

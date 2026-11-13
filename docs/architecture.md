@@ -32,7 +32,7 @@ Screen specs: `reference/ui_faces_and_workflows.md`. Earth Mode (face E) is a se
 
 ## 3. Decisions
 
-**Web stack.** React + Vite + TypeScript, plain CSS variables for the theme, static build, no SSR. Router: hash routes (`#/crew/body`, `#/ground/inbox`) so it works from `file://`, GitHub Pages and Tauri alike. Charts: hand-rolled SVG or one small chart lib, WEB's call. Body figure: **inline SVG, 2D** (WebKitGTK in Tauri on Linux is weak at WebGL).
+**Web stack.** React + Vite + TypeScript, plain CSS variables for the theme, static build, no SSR. Router: hash routes (`#/crew/body`, `#/ground/inbox`) so it works from `file://`, Cloudflare Pages and Tauri alike. Charts: hand-rolled SVG or one small chart lib, WEB's call. Body figure: **inline SVG, 2D** (WebKitGTK in Tauri on Linux is weak at WebGL).
 
 **Engine in the browser.** `wasm-pack build crates/core-wasm --target web --out-dir ../../apps/web/src/engine-pkg` (script `npm run engine`). Exactly one file, `apps/web/src/engine.ts`, imports the WASM and exposes typed functions. Components never import the WASM directly.
 
@@ -56,7 +56,7 @@ Screen specs: `reference/ui_faces_and_workflows.md`. Earth Mode (face E) is a se
 
 **Mobile.** React Native (Expo development build), Android only, driven by the same person as WEB. Hermes cannot run WebAssembly, so the phone does not embed the engine: it sends its `AssessInput` to the API (`POST /api/assess`) and renders the `Assessment` that comes back. Law 1 still holds: the engine is still the only thing deciding status. `ponytail:` the phone needs the API reachable; an on-device engine through a native Rust module is a stretch (MOBILE-5). Camera pulse logs a `reading` with `confidence: "low"`, which the engine turns into "confirm with a proper device" (workflow W5). Health Connect imports heart rate and sleep as `reading` events with `device: "health_connect"`. Contract types are shared with the web by type-only imports from `apps/web/src/contract`. **Kill switch:** if a development build does not show an `Assessment` on a device within 6 hours of starting, stop, record what works as a video, and put the time into WEB.
 
-**Hosting.** Web static build + `/safe/` on GitHub Pages (public link for judges). API on the Oracle VM behind HTTPS. Both must stay up until winners are announced (January 2027).
+**Hosting.** Web static build + `/safe/` on Cloudflare Pages (public link for judges; free and works with a private repo). API on the Oracle VM behind HTTPS. Both must stay up until winners are announced (January 2027).
 
 ## 4. Guardrails the code enforces
 

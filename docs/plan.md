@@ -95,14 +95,14 @@ If the kill switch fires: keep whatever runs, record it, and the time goes to WE
 | ID | Task | Done when |
 |---|---|---|
 | DEVOPS-1 | Keep CI green and quick: fix workflow problems, add build steps owners ask for (`devops:` issues), confirm `pr-screenshots` works on the first UI PR | every PR gets a result in a few minutes |
-| DEVOPS-2 | Pages deploy workflow: build the web app with the engine WASM, build the safe-mode WASM into `/safe/`, publish on every push to `main` | public link loads on a clean browser, `/safe/` included (needed by M4, aim for M2 so judges' link exists early) |
+| DEVOPS-2 | Cloudflare Pages deploy workflow: GitHub Actions builds the web app with the engine WASM, build the safe-mode WASM into `/safe/`, upload the folder with `wrangler pages deploy` on every push to `main` | public link loads on a clean browser, `/safe/` included (needed by M4, aim for M2 so judges' link exists early) |
 | DEVOPS-3 | API on the Oracle VM: build or copy the `ahc-api` binary, systemd service, HTTPS (reverse proxy), basic-auth and CORS from env vars, files in `deploy/` | public `/api/health` answers over HTTPS; restart survives a reboot |
-| DEVOPS-4 | Secrets and settings: Actions secrets, Pages settings, branch protection, the web app's API URL as a build variable | nothing secret in the repo; documented in `deploy/README.md` |
+| DEVOPS-4 | Secrets and settings: Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`), the Cloudflare Pages project, branch protection, the web app's API URL as a build variable | nothing secret in the repo; documented in `deploy/README.md` |
 | DEVOPS-5 | Stay-up plan: both links must work until winners are announced (January 2027); a simple uptime check and a note on how to redeploy | written in `deploy/README.md` |
 | DEVOPS-6 | Release for submission: tag the commit the video was recorded on, attach the mobile APK if mobile lives | tag exists, links in the submission |
 
 Order: 1 always. 2 as soon as WEB-1 is merged. 3 after ENGINE-3. 4, 5 by M4. 6 at M5.
-The repo is private; GitHub Pages on a private repo needs a paid plan or the repo made public. Decide which before DEVOPS-2.
+Hosting is Cloudflare Pages, not GitHub Pages: GitHub Pages on a private repo needs a paid plan. We build in GitHub Actions and upload, because Cloudflare's own builder has no Rust toolchain ready. The API must allow the `pages.dev` origin (CORS) and be HTTPS, or the browser blocks it.
 
 ## PITCH (`pitch/`): @Tu2525 and @m7mdnasrr
 

@@ -9,7 +9,7 @@ Owners: **@Tu2525** and **@m7mdnasrr**. Tasks: `docs/plan.md`, section DEVOPS.
 
 | Thing | Where | How it gets there |
 |---|---|---|
-| Web app (Crew App + Ground Station) | GitHub Pages | workflow on push to `main` (DEVOPS-2) |
+| Web app (Crew App + Ground Station) | Cloudflare Pages (`*.pages.dev`) | GitHub Actions builds, `wrangler pages deploy` uploads, on push to `main` (DEVOPS-2) |
 | Safe-Mode Console (WASM) | same site, under `/safe/` | built by the same workflow, must share the web app's origin |
 | API ("Ground Station") | Oracle VM, HTTPS | `ahc-api` binary + systemd + reverse proxy (DEVOPS-3) |
 | Mobile APK | built locally by MOBILE | attached to the release (DEVOPS-6) |

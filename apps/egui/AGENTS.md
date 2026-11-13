@@ -3,7 +3,7 @@
 Read the root `AGENTS.md` first. Tasks: `docs/plan.md`, section SAFE. Screens: face B in `docs/reference/ui_faces_and_workflows.md`.
 
 **You own:** `apps/egui`, `apps/desktop`, and the build output folder `apps/web/public/safe/`.
-Publishing is not yours: DEVOPS runs the Pages deploy. Give them the exact `trunk build` command that works (a `devops:` issue).
+Publishing is not yours: DEVOPS runs the Cloudflare Pages deploy. Give them the exact `trunk build` command that works (a `devops:` issue).
 **Not yours:** anything else in `apps/web`, anything in `crates/`.
 
 ## What you are building
