@@ -1,0 +1,54 @@
+/*
+ * THE COLOUR CODE. Single source for every face. See design/README.md.
+ * PROVISIONAL values (dark cockpit: calm by default, only what needs attention is bright).
+ * Change values here, never names. Mirrors: apps/egui (theme.rs), apps/mobile (theme.dart).
+ */
+:root {
+  /* Status: meaning is fixed. Always shown with icon + word (docs/contract.md section 2). */
+  --status-nominal: #3ecf8e; /* ● Nominal */
+  --status-watch: #4c9aff;   /* ◐ Watch   */
+  --status-caution: #f5a524; /* ▲ Caution */
+  --status-urgent: #f0445a;  /* ◆ Urgent  */
+  --status-unknown: #8a93a6; /* ○ Unknown */
+
+  /* Surfaces */
+  --bg: #0b0f17;
+  --surface: #121826;
+  --surface-raised: #1a2233;
+  --border: #263046;
+
+  /* Text */
+  --text: #e6eaf2;
+  --text-muted: #8a93a6;
+  --text-on-status: #0b0f17;
+
+  /* Brand / interactive */
+  --accent: #7c9cff;
+  --focus-ring: #a9bcff;
+
+  /* Data honesty chips */
+  --source-sourced: #3ecf8e;
+  --source-adapted: #f5a524;
+  --source-placeholder: #8a93a6;
+
+  /* Hazard lens (decorative, deliberately distinct from status hues where possible) */
+  --hazard-radiation: #c084fc;
+  --hazard-isolation: #67e8f9;
+  --hazard-distance: #f0abfc;
+  --hazard-gravity: #a3e635;
+  --hazard-closed-environment: #fda4af;
+
+  /* Shape, space, type */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --font-ui: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --touch-target: 48px; /* gloves, motion, low light */
+}

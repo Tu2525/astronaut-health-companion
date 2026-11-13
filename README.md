@@ -11,6 +11,8 @@ A self-assessment tool for crews on long missions: a clickable body figure, guid
 | You are | Read |
 |---|---|
 | Any agent or teammate | [`AGENTS.md`](AGENTS.md), then the `AGENTS.md` in your folder |
+| Asking "whose job is this?" | [`TEAM.md`](TEAM.md) |
+| Building UI | [`design/README.md`](design/README.md) (references + colour code) |
 | Looking for your tasks | [`docs/plan.md`](docs/plan.md) |
 | Wiring to the engine or API | [`docs/contract.md`](docs/contract.md) |
 | Wondering why | [`docs/architecture.md`](docs/architecture.md), [`docs/challenge.md`](docs/challenge.md) |

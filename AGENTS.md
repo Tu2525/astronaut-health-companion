@@ -5,11 +5,13 @@ The 48-hour clock is running. Read this file, then the `AGENTS.md` in your own f
 
 | Read | For |
 |---|---|
+| `TEAM.md` | Who is responsible for what, who decides, who covers |
 | `docs/challenge.md` | What the judges asked for |
 | `docs/architecture.md` | How the pieces fit and every cross-cutting decision |
 | `docs/contract.md` | The shared types, engine API, storage keys and HTTP API |
 | `docs/plan.md` | Milestones, your task list, cut lines |
 | `docs/reference/` | Original idea docs (UI screens and workflows, stack notes) |
+| `design/` | **UI look and the colour code.** The look is not final: check `design/references/` before any UI work, and use only tokens from `design/tokens.css` |
 
 ## The three laws
 
@@ -19,16 +21,16 @@ The 48-hour clock is running. Read this file, then the `AGENTS.md` in your own f
 
 ## Ownership
 
-| Role | Owns (may edit) | Agent | Driver |
-|---|---|---|---|
-| **ENGINE** | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract` (generated), `apps/web/src/faces/ground` | Claude | TBD |
-| **WEB** | `apps/web` except `src/contract` and `src/faces/ground` | Claude | TBD |
-| **SAFE** | `apps/egui`, `apps/desktop` | Claude | TBD |
-| **MOBILE** | `apps/mobile`, `crates/core-ffi` | Codex | TBD |
-| **PLANNER** | root files, `docs/`, `.github/` | Claude (planner) | @Tu2525 |
+| Role | Owns (may edit) | Agent |
+|---|---|---|
+| **ENGINE** | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract` (generated), `apps/web/src/faces/ground` | Claude |
+| **WEB** | `apps/web` except `src/contract` and `src/faces/ground` | Claude |
+| **SAFE** | `apps/egui`, `apps/desktop` | Claude |
+| **MOBILE** | `apps/mobile`, `crates/core-ffi` | Codex |
+| **PLANNER** | root files, `docs/`, `design/`, `.github/` | Claude (planner) |
 
 Root `Cargo.toml`: each owner may add **only their own crate** to `members`, nothing else.
-Drivers: put your GitHub handle in the table in your first PR.
+People, decisions and cover are in `TEAM.md`. Drivers: put your GitHub handle there in your first PR.
 
 ## Git workflow
 
@@ -90,5 +92,6 @@ Unsure about a decision that `AGENTS.md` and `docs/` do not settle? Append it to
 - Builds and your area's checks pass locally.
 - Works with the backend **off** and the AI **off** (offline-first).
 - Shows status as **colour + icon + word**, never colour alone.
+- No raw colours: every colour is a token from `design/tokens.css` (or your face's one mirror file). Matches the reference in `design/references/` if one exists.
 - No logic that belongs in the engine.
 - PR description lets @Tu2525 test it in two minutes.

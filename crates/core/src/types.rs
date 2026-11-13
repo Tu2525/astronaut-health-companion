@@ -5,36 +5,56 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-macro_rules! contract_enum {
-    ($(#[$m:meta])* $name:ident { $($v:ident),+ $(,)? }) => {
-        $(#[$m])*
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
-        #[serde(rename_all = "snake_case")]
-        #[ts(export)]
-        pub enum $name { $($v),+ }
-    };
+/// Ordered by severity: `max()` of statuses is the worst one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Status {
+    Unknown,
+    Nominal,
+    Watch,
+    Caution,
+    Urgent,
 }
 
-contract_enum!(
-    /// Ordered by severity: `max()` of statuses is the worst one.
-    Status { Unknown, Nominal, Watch, Caution, Urgent }
-);
-contract_enum!(
-    /// The four-step ladder, same everywhere.
-    Escalation { Monitor, SelfCare, ConsultGround, Urgent }
-);
-contract_enum!(Environment {
+/// The four-step ladder, same everywhere.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Escalation {
+    Monitor,
+    SelfCare,
+    ConsultGround,
+    Urgent,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Environment {
     Station,
     Transit,
     LunarBase,
     MarsBase,
-    EarthClinic
-});
-contract_enum!(
-    /// NASA HRP five hazards.
-    Hazard { Radiation, Isolation, Distance, Gravity, ClosedEnvironment }
-);
-contract_enum!(Region {
+    EarthClinic,
+}
+
+/// NASA HRP five hazards.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Hazard {
+    Radiation,
+    Isolation,
+    Distance,
+    Gravity,
+    ClosedEnvironment,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Region {
     Head,
     Eyes,
     Heart,
@@ -44,14 +64,26 @@ contract_enum!(Region {
     Gut,
     Immune,
     Skin,
-    Mind
-});
-contract_enum!(SourceStatus {
+    Mind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum SourceStatus {
     Sourced,
     Adapted,
-    Placeholder
-});
-contract_enum!(Confidence { Low, Medium, High });
+    Placeholder,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Confidence {
+    Low,
+    Medium,
+    High,
+}
 
 // ---------- Registry (rules as data, see registry.json) ----------
 
@@ -272,13 +304,16 @@ pub struct FlagAction {
 
 // ---------- Gamification (activity only: these types cannot hold a health value) ----------
 
-contract_enum!(ActivityKind {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum ActivityKind {
     Measurement,
     CheckIn,
     SymptomReported,
     FollowUp,
-    ReportSent
-});
+    ReportSent,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]

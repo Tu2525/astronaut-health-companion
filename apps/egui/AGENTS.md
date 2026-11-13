@@ -22,6 +22,7 @@ It is deliberately minimal: one status board, a quick-entry panel, a protocol ca
   - web: `localStorage` key `ahc.events.v1`, JSON `Event[]`, the same array the web app uses. Seed from `ahc_core::demo::events()` if empty. Re-read on focus so changes from the web app show up.
   - native: `events.json` in the app data dir, same shape.
 - Quick entry appends a `reading` event with `device: "safe-mode"`, `confidence: "high"`, the current environment, and both clocks. Never edits or deletes.
+- Colours: one file `src/theme.rs` mirroring `design/tokens.css` (same names). No colour literals anywhere else. Check `design/references/` for `safe-*` files first.
 - Status is shown as colour + icon + word, same vocabulary as the web (`docs/contract.md` section 2).
 - On the demo seed your board must show exactly the statuses the web app shows. Compare before every PR.
 - Getting the WASM output into `apps/web/public/safe/` needs one build step on the web side: agree it with WEB, do not edit their `package.json` yourself.

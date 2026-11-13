@@ -28,6 +28,7 @@ Android only. Flutter web and desktop targets are out of scope: do not use Flutt
 - Health Connect imports become `reading` events with `device: "health_connect"`, `confidence: "medium"`, values converted to the indicator's canonical unit (`docs/contract.md`).
 - Pulse signal processing: do it in Dart unless the bridge is already solid, then Rust in `core-ffi` is cleaner. Do not spend the first hours on it either way.
 - Packages: `health`, `camera`. Add others only when needed.
+- Colours: one file `lib/theme.dart` mirroring `design/tokens.css` (same names). No colour literals anywhere else. Check `design/references/` for `mobile-*` files first.
 - Status shown as colour + icon + word, same vocabulary as everywhere else.
 - Add `crates/core-ffi` to workspace `members` in the root `Cargo.toml` (that line is yours).
 

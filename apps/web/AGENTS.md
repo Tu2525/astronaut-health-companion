@@ -11,7 +11,7 @@ This is the hero. Judges click this link. It must look designed, not generated: 
 
 ## Stack (decided)
 
-React + Vite + TypeScript, static build, hash routes, CSS variables for theming, inline SVG for the body figure (no WebGL, no 3D). Add a dependency only when a few lines of your own will not do.
+React + Vite + TypeScript, static build, hash routes, CSS variables from `design/tokens.css` (import it once; never write a raw colour; read `design/README.md` and check `design/references/` before building a screen, the look is not final), inline SVG for the body figure (no WebGL, no 3D). Add a dependency only when a few lines of your own will not do.
 
 ## Layout to create in WEB-1
 
