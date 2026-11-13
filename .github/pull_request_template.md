@@ -14,6 +14,7 @@
 - [ ] egui
 - [ ] desktop
 - [ ] mobile
+- [ ] pitch
 - [ ] docs/ci
 
 ## Checklist
