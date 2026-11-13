@@ -355,3 +355,25 @@ pub struct Score {
     pub level: u32,
     pub streak_days: u32,
 }
+
+// ---------- Mission routine ----------
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum TaskKind {
+    Routine,
+    Bonus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct Task {
+    pub id: String,
+    pub kind: TaskKind,
+    pub label: String,
+    pub indicator_id: Option<String>,
+    pub due_met_s: f64,
+    pub completed: bool,
+    pub reason: Option<String>,
+}

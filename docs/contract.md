@@ -105,6 +105,14 @@ Escalation: `urgent` status gives `urgent`. `caution` gives `self_care`, or `con
 
 Flags: every indicator at `watch` or worse, worst first. Show the top one or two.
 
+### Mission routine
+
+`due_tasks(AssessInput) -> Task[]` returns today's routine slots and any optional follow-ups in mission-time order. The WASM export takes `AssessInput` as a JSON string and returns a `Task[]` JSON string.
+
+A task has `id`, `kind` (`routine` or `bonus`), `label`, `indicator_id` (null for check-in), `due_met_s`, `completed`, and an optional `reason`. The demo routine puts sleep at 05:00, resting heart rate, body temperature, and blood oxygen at 06:00, and crew check-in at 18:00. A trusted reading or check-in by the current crew member on the same mission day completes its routine slot, including early entries.
+
+The scheduler uses the assessment to prompt an optional recheck for a drifting or stale indicator. Mood and stress share a single check-in prompt, and the systolic and diastolic readings share one blood pressure prompt. Bonus tasks represent active suggestions and disappear once the engine clears the underlying condition. Gamification still scores recorded activity, so skipping a bonus task never affects a streak.
+
 ## 5. Registry
 
 `crates/core/registry.json`: one record per indicator (`Indicator` type). It carries the texts the UI shows: `what`, `why_in_space`, `how_to_measure`, `expected_change`, `source`, `actions`, `hazards`, `region`, `alt_units`.

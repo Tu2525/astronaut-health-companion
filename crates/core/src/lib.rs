@@ -4,10 +4,12 @@ pub mod demo;
 pub mod engine;
 pub mod gamify;
 mod report;
+mod scheduler;
 pub mod types;
 
 pub use engine::assess;
 pub use report::draft_sbar;
+pub use scheduler::due_tasks;
 pub use types::*;
 
 /// Built-in indicator registry (rules as data). Edit registry.json, not code.
