@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/core", "crates/core-wasm"]
-# Owners add their crate here in their first PR: crates/api, crates/core-ffi, apps/egui, apps/desktop/src-tauri
+# Owners add their crate here in their first PR: crates/api, apps/egui, apps/desktop/src-tauri
 
 [workspace.package]
 edition = "2021"

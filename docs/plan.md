@@ -20,7 +20,7 @@ Each task = one PR unless it says otherwise. PR title uses the task's area; ment
 
 | ID | Task | Done when |
 |---|---|---|
-| ENGINE-1 | `crates/api` skeleton: axum, `/api/health`, CORS, add to workspace | `cargo run -p ahc-api` answers health |
+| ENGINE-1 | `crates/api` skeleton: axum, `/api/health`, `/api/assess`, `/api/demo`, `/api/registry`, CORS, add to workspace. **Do this first: MOBILE is blocked on it** | `cargo run -p ahc-api` answers all four; `curl` examples in the PR |
 | ENGINE-2 | Contract: `Report`, `Sbar`, `draft_sbar()` in core + wasm export + TS types | test asserts SBAR for the BP flag; `contract.md` updated |
 | ENGINE-3 | API reports and notes with two-way delay, JSONL persistence, basic auth | test: report invisible before `deliver_at`, visible after |
 | ENGINE-4 | Prompt scheduler in core: `due_tasks(input) -> Task[]` (routine slots + bonus tasks for stale or drifting indicators; bonus tasks never break streaks) | test: demo state yields a BP bonus task |
@@ -53,6 +53,7 @@ You are also on call for `contract:` issues: answer within 15 minutes, they bloc
 | WEB-13 | Optional local AI explainer (see architecture) | stretch, only after M3 |
 
 Order: 1 by M0. 2, 3 by M1. 4, 5, 6, 7 by M2. 8, 9, 10 by M3. 11, 12 by M4.
+WEB and MOBILE have the same driver (@AMRYB), in separate sessions and worktrees. WEB comes first whenever the two compete.
 WEB has the most screens: run independent screens in parallel subagents once WEB-1 is merged (they touch different folders under `src/faces/crew/`).
 
 ## SAFE (`apps/egui`, `apps/desktop`)
@@ -69,18 +70,19 @@ WEB has the most screens: run independent screens in parallel subagents once WEB
 
 Order: 1 by M0. 2 by M1. 3, 4 by M3 (aim for M2). 5 by M4. 6 is cut first if late.
 
-## MOBILE (`apps/mobile`, `crates/core-ffi`)
+## MOBILE (`apps/mobile`), React Native
 
 | ID | Task | Done when |
 |---|---|---|
-| MOBILE-1 | Flutter app from the flutter_rust_bridge template; `core-ffi` wraps `assess_json` and `demo`; screen shows overall status | runs on a device or emulator. **Kill switch: T+6** |
+| MOBILE-1 | Expo + TypeScript app, development build on Android, type-only contract imports, `src/theme.ts`, API client; screen shows overall status from `POST /api/assess` on the demo seed | runs on a device or emulator; `typecheck`, `lint`, `test` scripts pass. **Kill switch: T+6** |
 | MOBILE-2 | D2 Camera pulse: fingertip on lens + torch, live signal, bpm estimate, confidence meter, logs `reading` with `confidence: low`, shows the engine's "confirm with a cuff" | workflow W5 |
 | MOBILE-3 | D3 Health Connect: permissions, import heart rate and sleep as `reading` events | values appear in the status list |
 | MOBILE-4 | D1 Home (status + top flag + next task) and D4 Quick check-in | |
-| MOBILE-5 | Sync: POST events to the API when reachable | stretch |
-| MOBILE-6 | CI green, debug APK artifact; screen recording for the video | |
+| MOBILE-5 | On-device engine through a native Rust module (`crates/core-ffi`), so the phone works with the API off | stretch |
+| MOBILE-6 | Debug APK built locally; screen recording for the video | |
 
-If the kill switch fires: keep whatever runs, record it, and take WEB-9, WEB-11 or WEB-12.
+Blocked on ENGINE-1 for the real endpoint; until it lands, develop against a saved JSON response.
+If the kill switch fires: keep whatever runs, record it, and the time goes to WEB-9, WEB-11 or WEB-12.
 
 ## PLANNER / humans
 
@@ -109,6 +111,7 @@ Never cut: body figure, guided measurement, guidance with ladder, delayed ground
 |---|---|
 | Faces disagree on status | Law 1; SAFE-2 and ENGINE-5 compare against the web on the demo seed |
 | Contract churn | Only ENGINE edits it; `!` in the PR title; announce in chat |
+| One driver for WEB and MOBILE | WEB first; mobile kill switch; SAFE takes whole web screens when free |
 | WASM toolchain eats time | WEB-1 and SAFE-3 are first-hour checks; ask ENGINE at once if stuck |
 | Merge queue jams | Small PRs, one feature each, PLAN-1 |
 | Demo breaks offline | Definition of done: works with API and AI off |

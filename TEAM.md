@@ -14,7 +14,8 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 | **SAFE** | _TBD_ | NA | Safe-Mode Console (native + `/safe/` in the browser), Pages deploy, Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..7 |
 | **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
 
-Unassigned teammates: @SamaWaheed, @Mostafa-Emad-El-Din, @AMRYB (one role each above).
+Still unassigned: SAFE.
+@AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
 
 ## Who decides
 
@@ -46,7 +47,7 @@ Unassigned teammates: @SamaWaheed, @Mostafa-Emad-El-Din, @AMRYB (one role each a
 | Role | Covered by | Notes |
 |---|---|---|
 | ENGINE | PLANNER | contract issues cannot wait |
-| WEB | SAFE first, then MOBILE after the kill switch | WEB has the most screens; helpers take whole screens (WEB-9, WEB-11, WEB-12), in their own folders |
+| WEB | SAFE first; @AMRYB's own mobile time after the kill switch | WEB has the most screens; helpers take whole screens (WEB-9, WEB-11, WEB-12), in their own folders |
 | SAFE | ENGINE | both are Rust |
 | MOBILE | nobody | it is cut instead |
 

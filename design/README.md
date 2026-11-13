@@ -36,7 +36,7 @@ Then add one line to the table below so agents know what is binding:
 One file holds every colour, plus radius, spacing and font tokens. It is **provisional** until a human replaces the values from the references. Names stay stable; only values change. That is the point: re-skinning the whole product is an edit to this one file.
 
 - **Web** imports `design/tokens.css` directly and uses `var(--...)` everywhere.
-- **Safe mode (egui)** and **mobile (Flutter)** cannot import CSS: each keeps **one** file (`theme.rs`, `theme.dart`) that mirrors these tokens with the same names, with a comment pointing here. When `tokens.css` changes, the PR that changes it says so, and those owners update their mirror.
+- **Safe mode (egui)** and **mobile (React Native)** cannot import CSS: each keeps **one** file (`theme.rs`, `theme.ts`) that mirrors these tokens with the same names, with a comment pointing here. When `tokens.css` changes, the PR that changes it says so, and those owners update their mirror.
 
 ## 3. Rules for agents building UI
 

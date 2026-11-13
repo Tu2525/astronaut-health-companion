@@ -1,7 +1,7 @@
 /*
  * THE COLOUR CODE. Single source for every face. See design/README.md.
  * PROVISIONAL values (dark cockpit: calm by default, only what needs attention is bright).
- * Change values here, never names. Mirrors: apps/egui (theme.rs), apps/mobile (theme.dart).
+ * Change values here, never names. Mirrors: apps/egui (theme.rs), apps/mobile (src/theme.ts).
  */
 :root {
   /* Status: meaning is fixed. Always shown with icon + word (docs/contract.md section 2). */

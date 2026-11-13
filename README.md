@@ -24,11 +24,10 @@ A self-assessment tool for crews on long missions: a clickable body figure, guid
 crates/core        shared types, indicator registry, assessment engine, demo seed
 crates/core-wasm   JSON bridge for the browser
 crates/api         "Ground Station" backend (axum)            [to build]
-crates/core-ffi    bridge for mobile                           [to build]
 apps/web           Crew App + Ground Station (React)           [to build]
 apps/egui          Safe-Mode Console, native + WASM            [to build]
 apps/desktop       Tauri shell                                 [to build]
-apps/mobile        Flutter companion                           [to build]
+apps/mobile        React Native companion                      [to build]
 ```
 
 ## Quick check

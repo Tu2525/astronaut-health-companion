@@ -7,14 +7,14 @@ Decisions only. Shapes and endpoints are in `contract.md`; tasks are in `plan.md
 ```
                      crates/core  (types + registry.json + assess() + gamify + demo seed)
                           │ the ONLY place status is decided
-      ┌───────────────┬───┴────────────┬──────────────────┐
-  core-wasm        (direct)         (direct)           core-ffi
-      │               │                │                  │
-  apps/web        apps/egui        crates/api         apps/mobile
-  Crew App        Safe-Mode        "Ground Station"   Flutter companion
-  + Ground face   native + WASM    axum, holds        camera pulse,
-  (React, SVG)    at /safe/        reports for the    Health Connect
-      │                            comms delay
+      ┌───────────────┬───┴────────────┐
+  core-wasm        (direct)         (direct)
+      │               │                │
+  apps/web        apps/egui        crates/api  <── HTTP ──  apps/mobile
+  Crew App        Safe-Mode        "Ground Station"         React Native companion
+  + Ground face   native + WASM    axum, holds reports      camera pulse,
+  (React, SVG)    at /safe/        for the comms delay,     Health Connect
+      │                            runs assess for mobile
   apps/desktop (Tauri shell around apps/web's build)
 ```
 
@@ -54,7 +54,7 @@ Screen specs: `reference/ui_faces_and_workflows.md`. Earth Mode (face E) is a se
 
 **Local AI (stretch, after M3).** Explainer text v1 is the registry's `what` / `why_in_space` plus the engine's `reason`: deterministic and already sourced. If time allows, WEB adds an optional local model (Ollama on `localhost:11434`) that rephrases those texts and drafts the SBAR wording. It receives the engine result and registry text, shows the engine status above its answer, has an off switch, and the app must be complete without it.
 
-**Mobile.** Flutter, Android only. `crates/core-ffi` wraps `assess_json` with flutter_rust_bridge. Camera pulse logs a `reading` with `confidence: "low"`, which the engine turns into "confirm with a proper device" (workflow W5). Health Connect imports heart rate and sleep as `reading` events with `device: "health_connect"`. Sync to the rest of the system: POST events to the API if it is up; otherwise the phone demo stands alone. **Kill switch:** if the bridge does not return an `Assessment` on a device within 6 hours of starting, stop, record what works as a video, and MOBILE moves to help WEB.
+**Mobile.** React Native (Expo development build), Android only, driven by the same person as WEB. Hermes cannot run WebAssembly, so the phone does not embed the engine: it sends its `AssessInput` to the API (`POST /api/assess`) and renders the `Assessment` that comes back. Law 1 still holds: the engine is still the only thing deciding status. `ponytail:` the phone needs the API reachable; an on-device engine through a native Rust module is a stretch (MOBILE-5). Camera pulse logs a `reading` with `confidence: "low"`, which the engine turns into "confirm with a proper device" (workflow W5). Health Connect imports heart rate and sleep as `reading` events with `device: "health_connect"`. Contract types are shared with the web by type-only imports from `apps/web/src/contract`. **Kill switch:** if a development build does not show an `Assessment` on a device within 6 hours of starting, stop, record what works as a video, and put the time into WEB.
 
 **Hosting.** Web static build + `/safe/` on GitHub Pages (public link for judges). API on the Oracle VM behind HTTPS. Both must stay up until winners are announced (January 2027).
 
