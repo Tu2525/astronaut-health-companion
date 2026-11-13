@@ -29,7 +29,7 @@ pub fn draft_sbar(assessment_json: &str, registry_json: &str) -> Result<String, 
     Ok(json(&ahc_core::draft_sbar(&assessment, &registry)))
 }
 
-/// Seeded demo state with the active crew's log and activity-only crew scores.
+/// Seeded demo state: { crew_id, now_met_s, launch_earth_ms, events, kit }.
 #[wasm_bindgen]
 pub fn demo() -> String {
     json(&ahc_core::demo::seed())
