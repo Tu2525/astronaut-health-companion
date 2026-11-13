@@ -26,8 +26,8 @@ Owners: **@Tu2525** and **@m7mdnasrr**. Tasks: `docs/plan.md`, section DEVOPS.
 
 ## To fill in as it is built
 
-- Public web URL:
-- Public API URL:
+- Public web URL (step 4a):
+- Public API URL and hostname (step 4d):
 - Where the secrets live and what each is called:
 - How to redeploy the API:
 - How to check both are up:

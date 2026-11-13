@@ -101,7 +101,47 @@ If the kill switch fires: keep whatever runs, record it, and the time goes to WE
 | DEVOPS-5 | Stay-up plan: both links must work until winners are announced (January 2027); a simple uptime check and a note on how to redeploy | written in `deploy/README.md` |
 | DEVOPS-6 | Release for submission: tag the commit the video was recorded on, attach the mobile APK if mobile lives | tag exists, links in the submission |
 
-Order: 1 always. 2 as soon as WEB-1 is merged. 3 after ENGINE-3. 4, 5 by M4. 6 at M5.
+Order: 1 always. 4 now. 2 as soon as WEB-1 is merged. 3 first deploy after ENGINE-1 (health only), again after ENGINE-3. 5 by M4. 6 at M5.
+
+### DEVOPS steps
+
+Split (change it if you prefer): **@Tu2525** does what needs an account or the VM (wrangler is logged in and the SSH key is on that machine). **@m7mdnasrr** writes what lives in the repo (workflows, scripts, service files). Tick a box in the PR that finishes it.
+
+**Now, before any app code exists**
+
+- [ ] `4a` @Tu2525: create the Cloudflare Pages project with wrangler (direct upload, not the Git connection) and upload a one-line placeholder page. Write the `pages.dev` link in `deploy/README.md`.
+- [ ] `4b` @Tu2525: create a Cloudflare API token limited to Pages edit. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as Actions secrets.
+- [ ] `4c` @Tu2525: check the VM: SSH works, note its CPU type (Oracle free VMs are often ARM), open ports 80 and 443 in **both** the Oracle security list and the VM firewall.
+- [ ] `4d` @Tu2525: decide the API hostname. HTTPS needs a name, not a bare IP: a domain you own, or a free one that maps to the IP. Write it in `deploy/README.md`.
+- [ ] `1a` @m7mdnasrr: read the four workflows in `.github/workflows/`, open a test PR and confirm each one reports. Note the run time of each.
+
+**When WEB-1 merges (DEVOPS-2)**
+
+- [ ] `2a` @m7mdnasrr: `.github/workflows/deploy.yml`, on push to `main`: build the engine WASM, `npm run build` in `apps/web`, then `wrangler pages deploy` of the output folder. Reuse the setup steps from `web.yml`.
+- [ ] `2b` @m7mdnasrr: pass the API address to the build as an Actions variable (not a secret, it is public), never hard-coded.
+- [ ] `2c` @Tu2525: open the link in a private window with the network tab open: page loads, WASM loads, no request fails when the API is off.
+- [ ] `2d` @m7mdnasrr, when SAFE-3 merges: add the `trunk build` step so safe mode lands in `/safe/` of the same upload. SAFE gives the command.
+
+**When ENGINE-1 merges (DEVOPS-3)**
+
+- [ ] `3a` @m7mdnasrr: `deploy/ahc-api.service` (systemd, restarts on failure, reads an env file) and `deploy/Caddyfile` (HTTPS in front of the API).
+- [ ] `3b` @m7mdnasrr: `deploy/deploy-api.sh`: over SSH, pull `main`, `cargo build --release -p ahc-api` **on the VM** (avoids cross-compiling for ARM), restart the service.
+- [ ] `3c` @Tu2525: on the VM, install Rust and Caddy, create the env file with the ground user and password (never in the repo), run the script.
+- [ ] `3d` @Tu2525: `https://<host>/api/health` answers from a phone on mobile data. Reboot the VM once and check it comes back.
+- [ ] `3e` both: from the deployed web page, a call to the API succeeds (CORS allows the `pages.dev` origin) and the ground routes refuse a wrong password.
+- [ ] `3f` after ENGINE-3: redeploy, check reports survive a restart (the JSONL data folder is outside the checkout).
+
+**Ongoing (DEVOPS-1)**
+
+- [ ] `1b` answer `devops:` issues quickly; a missing check blocks someone's PR.
+- [ ] `1c` first UI PR: confirm `pr-screenshots` fails without an image and passes with one.
+- [ ] `1d` watch Actions minutes: a private repo gets a limited free amount per month and Rust builds use it fast. Keep the caches working; if it runs low, tell @Tu2525.
+
+**By M4 and M5 (DEVOPS-5, DEVOPS-6)**
+
+- [ ] `5a` @m7mdnasrr: fill in "how to redeploy" and "how to check both are up" in `deploy/README.md`, tested by the other owner following it.
+- [ ] `5b` @Tu2525: a free uptime check on both links that emails on failure. They must stay up until January 2027.
+- [ ] `6a` @Tu2525: tag the commit the demo video was recorded on; attach the APK if mobile lives; put both links in the submission.
 Hosting is Cloudflare Pages, not GitHub Pages: GitHub Pages on a private repo needs a paid plan. We build in GitHub Actions and upload, because Cloudflare's own builder has no Rust toolchain ready. The API must allow the `pages.dev` origin (CORS) and be HTTPS, or the browser blocks it.
 
 ## PITCH (`pitch/`): @Tu2525 and @m7mdnasrr
