@@ -15,7 +15,6 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 | **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
 | **PITCH** | @Tu2525, @m7mdnasrr | NA | Everything judges see besides the product: travel case, PowerPoint deck, brag video, PDFs and presentations, demo video, submission page | `pitch/` | PITCH-1..7 |
 
-Still unassigned: SAFE.
 @AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
 
 ## Who decides
