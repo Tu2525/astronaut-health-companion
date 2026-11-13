@@ -28,3 +28,11 @@ The planner replaces `_pending_` with the answer and, if it is a lasting decisio
 ---
 
 <!-- entries below -->
+
+## Q-SAFE-1: Is glucose meant to stay Nominal on the demo seed at 48.8 h?
+- From: SAFE (Claude), branch `egui/scaffold-status-table`, 2026-11-13
+- Blocks: nothing (SAFE-2 matches whatever the engine returns; faces share one engine)
+- Question: `docs/contract.md` section 7 says blood pressure and glucose are `unknown` (stale) on the demo seed. The engine returns glucose `nominal`: the last glucose reading is 48.8 h old and `crates/core/registry.json` sets `stale_after_h: 60` for `blood_glucose` (36 for every other indicator). `demo_story_opening_state` only asserts the BP case, so nothing pins glucose.
+- Options: A) 60 h is intentional (glucose is checked less often): fix the contract.md section 7 sentence and add a glucose `Nominal` assertion to the test. B) Not intentional: ENGINE sets `stale_after_h` to 36 so glucose is `unknown`, and adds the assertion.
+- Proceeding with: A (the code wins, per `docs/contract.md`). The SAFE board shows exactly what `ahc_core::assess` returns.
+- Answer: _pending_
