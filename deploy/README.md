@@ -24,10 +24,37 @@ Owners: **@Tu2525** and **@m7mdnasrr**. Tasks: `docs/plan.md`, section DEVOPS.
 - Other owners ask for CI or deploy changes through a `devops:` issue with the command that works locally. Answer quickly: a red or missing check blocks their PR.
 - Workflow changes follow the same PR rules as everything else, and say in the PR whether the workflow has actually run.
 
+## Files
+
+| File | What |
+|---|---|
+| `.github/workflows/deploy.yml` | push to `main`: build web (+ `/safe/` once `apps/egui/index.html` exists), `wrangler pages deploy`. Skips itself while `apps/web/package.json` is missing |
+| `deploy/ahc-api.service` | systemd unit, restarts on failure, reads `/etc/ahc/api.env` |
+| `deploy/Caddyfile` | HTTPS in front of the API on `127.0.0.1:8080` |
+| `deploy/api.env.example` | env var names the API reads (ENGINE must match) |
+| `deploy/deploy-api.sh` | `./deploy/deploy-api.sh user@host`: pull, build on the VM, restart |
+
+## Secrets and settings
+
+| Name | Kind | Where |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | Actions secret | token limited to Pages edit |
+| `CLOUDFLARE_ACCOUNT_ID` | Actions secret | Cloudflare dashboard |
+| `AHC_API_URL` | Actions **variable** | public API URL, becomes `VITE_API_URL` at build |
+| `/etc/ahc/api.env` | file on the VM | ground user and password, CORS origin |
+
+## First-time VM setup (one time, by hand)
+
+1. `sudo useradd -r ahc; sudo mkdir -p /opt/ahc /var/lib/ahc /etc/ahc; sudo chown ahc /opt/ahc /var/lib/ahc`
+2. Install Rust (rustup) and Caddy. `git clone` the repo into `/opt/ahc`.
+3. Copy `deploy/api.env.example` to `/etc/ahc/api.env`, set the real password, `chmod 600`.
+4. Copy `deploy/ahc-api.service` to `/etc/systemd/system/`, `sudo systemctl enable --now ahc-api`.
+5. Put the real hostname in `deploy/Caddyfile`, install it as `/etc/caddy/Caddyfile`, `sudo systemctl reload caddy`.
+6. Open ports 80 and 443 in the Oracle security list and the VM firewall.
+
 ## To fill in as it is built
 
 - Public web URL (step 4a):
 - Public API URL and hostname (step 4d):
-- Where the secrets live and what each is called:
-- How to redeploy the API:
-- How to check both are up:
+- How to redeploy the API: `./deploy/deploy-api.sh user@host`
+- How to check both are up: open the web URL in a private window; `curl https://<host>/api/health` returns `{"ok":true}`.
