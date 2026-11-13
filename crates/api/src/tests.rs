@@ -4,9 +4,9 @@ use axum::{
         header::{
             ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS,
             ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS,
-            ACCESS_CONTROL_REQUEST_METHOD, ORIGIN,
+            ACCESS_CONTROL_REQUEST_METHOD, CONTENT_TYPE, ORIGIN,
         },
-        Request,
+        Method, Request,
     },
     response::Response,
 };
@@ -97,6 +97,7 @@ async fn rejects_malformed_requests_and_indicators_without_ranges() {
 #[tokio::test]
 async fn allows_json_requests_from_a_browser_origin() {
     let response = router()
+        .layer(comms::cors_layer())
         .oneshot(
             Request::builder()
                 .method(Method::OPTIONS)
@@ -116,8 +117,9 @@ async fn allows_json_requests_from_a_browser_origin() {
         .unwrap()
         .split(',')
         .any(|method| method.trim() == "POST"));
-    assert_eq!(
-        response.headers()[ACCESS_CONTROL_ALLOW_HEADERS],
-        "content-type"
-    );
+    assert!(response.headers()[ACCESS_CONTROL_ALLOW_HEADERS]
+        .to_str()
+        .unwrap()
+        .split(',')
+        .any(|header| header.trim() == "content-type"));
 }

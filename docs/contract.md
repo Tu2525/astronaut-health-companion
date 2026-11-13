@@ -142,7 +142,7 @@ Append with read-modify-write of the whole array, and listen to the `storage` ev
 
 ## 9. Ground Station HTTP API (`crates/api`, axum)
 
-Base `/api`. JSON. CORS open. The astronaut side must work when this is unreachable.
+Base `/api`. JSON. CORS allows all origins by default. The astronaut side must work when this is unreachable.
 
 | Method | Path | Auth | Body / result |
 |---|---|---|---|
@@ -150,9 +150,9 @@ Base `/api`. JSON. CORS open. The astronaut side must work when this is unreacha
 | POST | `/api/assess` | none | body `AssessInput`; returns `Assessment` (`ahc_core::assess_json`). Used by mobile |
 | GET | `/api/demo` | none | `{ crew_id, now_met_s, launch_earth_ms, events, kit }`, same as the WASM `demo()` |
 | GET | `/api/registry` | none | `Indicator[]` |
-| POST | `/api/reports` | none | body `Report`; server stores it; 201 |
+| POST | `/api/reports` | none | body `Report`; server stores it; 201. Retrying the same report is idempotent. Reusing its ID with different contents returns 409. |
 | GET | `/api/reports` | basic | `Report[]` whose `deliver_at_earth_ms <= server now` (the delay is enforced here) |
-| POST | `/api/notes` | basic | `{ crew_id, text, in_reply_to?, delay_s }`; server stamps `sent_earth_ms` and delivery time |
+| POST | `/api/notes` | basic | `{ crew_id, text, in_reply_to?, delay_s }`; server stamps `sent_earth_ms` and delivery time; 201. A reply must reference a delivered report for the same crew. |
 | GET | `/api/notes?crew_id=cdr` | none | delivered notes as `Event[]` with `kind.type = "ground_note"`; the crew app appends new ones to its log |
 
 `Report` carries an `Sbar` draft, the assessment at send time, and the crew member's events from the preceding 48 mission hours:
@@ -166,3 +166,7 @@ Base `/api`. JSON. CORS open. The astronaut side must work when this is unreacha
 
 `draft_sbar(assessment, registry) -> Sbar` lives in core and is deterministic. It uses the highest-ranked flag, the latest reading and available baselines, and the engine's next step. If there are no flags, it reports the overall status and escalation. The WASM export takes two JSON strings and returns an `Sbar` JSON string. The AI may only rephrase the draft.
 Delay is two-way: reports are held on the way down, notes on the way up. Demo default `one_way_delay_s = 20`, shown in the UI as "18 min (compressed for demo)".
+
+Use actual UTC milliseconds for a report's `sent_earth_ms` and `deliver_at_earth_ms` so the outbox countdown and server clock agree. Mission elapsed seconds and the event log keep the simulated mission clock. A delivered note's `kind.sent_earth_ms` holds the actual UTC send time. Its outer `met_s`, `earth_ms`, and `environment` place the arrival on the mission timeline using the replied-to report or the latest delivered report for that crew. With no report context, the API uses the transit demo clock at startup seed time plus the note delay.
+
+Set `AHC_DATA_DIR` to a persistent directory for the server's report and note JSONL logs. Local development defaults to `target/ahc-data`. Run one API process per data directory. Ground routes require `AHC_GROUND_USER` and `AHC_GROUND_PASS` (or `AHC_GROUND_PASSWORD` if `AHC_GROUND_PASS` is unset). Set `AHC_CORS_ORIGINS` to a comma-separated origin allowlist when deploying with restricted CORS.
