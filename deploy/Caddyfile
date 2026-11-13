@@ -1,5 +1,13 @@
-# Replace ahc12.duckdns.org with the real hostname (DEVOPS step 4d). Caddy gets the HTTPS certificate itself.
+# Shares a VM whose 80/443 belong to another service, so: port 8445, certificate via DuckDNS DNS challenge.
+# Needs Caddy built with the duckdns plugin (`sudo caddy add-package github.com/caddy-dns/duckdns`)
+# and DUCKDNS_TOKEN in /etc/ahc/duckdns.env (see deploy/README.md).
 # CORS and basic auth are done by the API (env vars), Caddy only terminates TLS.
-ahc12.duckdns.org {
+{
+	auto_https disable_redirects
+}
+ahc12.duckdns.org:8445 {
+	tls {
+		dns duckdns {env.DUCKDNS_TOKEN}
+	}
 	reverse_proxy 127.0.0.1:8080
 }

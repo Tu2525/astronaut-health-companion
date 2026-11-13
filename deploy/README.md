@@ -55,7 +55,7 @@ Owners: **@Tu2525** and **@m7mdnasrr**. Tasks: `docs/plan.md`, section DEVOPS.
 ## To fill in as it is built
 
 - Public web URL (step 4a): https://ahc-37u.pages.dev (Pages project `ahc`, account Tareksheren@gmail.com)
-- API VM (step 4c): Oracle, aarch64, 2 CPUs, Rust and Caddy not yet installed
-- Public API URL and hostname (step 4d): https://ahc12.duckdns.org (DuckDNS -> 84.8.255.31)
+- API VM (step 4c): `nutq-vm` (ssh alias), Oracle aarch64, 2 CPUs, shared with another project whose Docker Caddy owns 80/443. Rust and Caddy installed; port 8445 open in the security list and iptables
+- Public API URL and hostname (step 4d): https://ahc12.duckdns.org:8445 (DuckDNS -> 84.8.255.31). Certificate via DuckDNS DNS challenge; token lives in /etc/ahc/duckdns.env on the VM, never in the repo
 - How to redeploy the API: `./deploy/deploy-api.sh user@host`
-- How to check both are up: open the web URL in a private window; `curl https://<host>/api/health` returns `{"ok":true}`.
+- How to check both are up: open the web URL in a private window; `curl https://ahc12.duckdns.org:8445/api/health` returns `{"ok":true}`.
