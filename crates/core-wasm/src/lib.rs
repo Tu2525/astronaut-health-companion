@@ -19,6 +19,16 @@ pub fn registry() -> String {
     json(&ahc_core::registry())
 }
 
+/// Assessment and Indicator[] JSON -> Sbar JSON.
+#[wasm_bindgen]
+pub fn draft_sbar(assessment_json: &str, registry_json: &str) -> Result<String, JsError> {
+    let assessment =
+        serde_json::from_str(assessment_json).map_err(|e| JsError::new(&e.to_string()))?;
+    let registry: Vec<ahc_core::Indicator> =
+        serde_json::from_str(registry_json).map_err(|e| JsError::new(&e.to_string()))?;
+    Ok(json(&ahc_core::draft_sbar(&assessment, &registry)))
+}
+
 /// Seeded demo state: { crew_id, now_met_s, launch_earth_ms, events, kit }.
 #[wasm_bindgen]
 pub fn demo() -> String {

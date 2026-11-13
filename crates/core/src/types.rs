@@ -302,6 +302,30 @@ pub struct FlagAction {
     pub available: bool,
 }
 
+// ---------- Crew-to-ground reports ----------
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct Sbar {
+    pub situation: String,
+    pub background: String,
+    pub assessment: String,
+    pub recommendation: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct Report {
+    pub id: String,
+    pub crew_id: String,
+    pub sent_met_s: f64,
+    pub sent_earth_ms: f64,
+    pub deliver_at_earth_ms: f64,
+    pub sbar: Sbar,
+    pub assessment: Assessment,
+    pub events: Vec<Event>,
+}
+
 // ---------- Gamification (activity only: these types cannot hold a health value) ----------
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, TS)]
