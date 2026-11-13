@@ -14,7 +14,7 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 | **SAFE** | _TBD_ | NA | Safe-Mode Console (native + `/safe/` in the browser), Pages deploy, Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..7 |
 | **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
 
-Still unassigned: ENGINE and SAFE, between @SamaWaheed and @Mostafa-Emad-El-Din.
+Still unassigned: SAFE.
 @AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
 
 ## Who decides
