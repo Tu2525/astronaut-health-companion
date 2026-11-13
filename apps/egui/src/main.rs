@@ -8,7 +8,8 @@ use eframe::egui::{self, pos2, Color32, Label, RichText, Sense, Shape, Stroke, V
 struct App {
     assessment: Assessment,
     now_met_s: f64,
-    names: Vec<(String, String)>,
+    /// (id, name, canonical unit) from the registry; the engine owns these texts.
+    indicators: Vec<(String, String, String)>,
 }
 
 impl App {
@@ -20,20 +21,23 @@ impl App {
             kit: demo::kit(),
             registry: None,
         };
-        let names = registry().into_iter().map(|i| (i.id, i.name)).collect();
+        let indicators = registry()
+            .into_iter()
+            .map(|i| (i.id, i.name, i.unit))
+            .collect();
         Self {
             assessment: assess(&input),
             now_met_s: input.now_met_s,
-            names,
+            indicators,
         }
     }
 
-    fn name_of(&self, id: &str) -> String {
-        self.names
+    /// Registry name and unit for an indicator id (falls back to the id).
+    fn describe<'a>(&'a self, id: &'a str) -> (&'a str, &'a str) {
+        self.indicators
             .iter()
-            .find(|(i, _)| i == id)
-            .map(|(_, n)| n.clone())
-            .unwrap_or_else(|| id.into())
+            .find(|(i, _, _)| i == id)
+            .map_or((id, ""), |(_, n, u)| (n.as_str(), u.as_str()))
     }
 }
 
@@ -113,8 +117,9 @@ impl eframe::App for App {
                     ui.end_row();
                     for i in &self.assessment.indicators {
                         let (c, _, word) = theme::status_look(i.status);
-                        ui.label(self.name_of(&i.indicator_id));
-                        ui.label(i.value.map_or("-".into(), |v| format!("{v:.1}")));
+                        let (name, unit) = self.describe(&i.indicator_id);
+                        ui.label(name);
+                        ui.label(i.value.map_or("-".into(), |v| format!("{v:.1} {unit}")));
                         ui.horizontal(|ui| {
                             status_icon(ui, i.status, c);
                             ui.label(RichText::new(word).color(c).strong());
