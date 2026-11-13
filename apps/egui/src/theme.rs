@@ -3,8 +3,8 @@
 //! When `tokens.css` changes, update the values here (see `design/README.md`, section 2).
 #![allow(dead_code)] // the whole token set is mirrored, not only what is used today
 
-use ahc_core::Status;
-use eframe::egui::{Color32, Context, Stroke, Visuals};
+use ahc_core::{SourceStatus, Status};
+use eframe::egui::{Color32, Context, Stroke, TextStyle, Visuals};
 
 // Status: meaning is fixed. Always shown with icon + word (docs/contract.md section 2).
 pub const STATUS_NOMINAL: Color32 = Color32::from_rgb(0x3e, 0xcf, 0x8e);
@@ -66,8 +66,32 @@ pub fn status_look(s: Status) -> (Color32, &'static str, &'static str) {
     }
 }
 
+/// Chip colour for a range's source status (`--source-*` tokens).
+pub fn source_colour(s: SourceStatus) -> Color32 {
+    match s {
+        SourceStatus::Sourced => SOURCE_SOURCED,
+        SourceStatus::Adapted => SOURCE_ADAPTED,
+        SourceStatus::Placeholder => SOURCE_PLACEHOLDER,
+    }
+}
+
 /// Dark high-contrast look from the tokens. Call once at start-up.
 pub fn apply(ctx: &Context) {
+    // Larger than egui's defaults: read at arm's length, in motion and low light.
+    ctx.style_mut(|s| {
+        for (style, size) in [
+            (TextStyle::Small, 13.0_f32),
+            (TextStyle::Body, 16.0),
+            (TextStyle::Button, 16.0),
+            (TextStyle::Monospace, 15.0),
+            (TextStyle::Heading, 22.0),
+        ] {
+            if let Some(font) = s.text_styles.get_mut(&style) {
+                font.size = size;
+            }
+        }
+        s.spacing.item_spacing.y = SPACE_2;
+    });
     let mut v = Visuals::dark();
     v.panel_fill = BG;
     v.window_fill = SURFACE;
@@ -80,4 +104,102 @@ pub fn apply(ctx: &Context) {
     v.selection.bg_fill = SURFACE_RAISED;
     v.widgets.noninteractive.bg_stroke = Stroke::new(1.0_f32, BORDER);
     ctx.set_visuals(v);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Every `--token` in design/tokens.css, by name, with the mirrored value.
+    fn mirror() -> Vec<(&'static str, String)> {
+        let hex = |c: Color32| format!("#{:02x}{:02x}{:02x}", c.r(), c.g(), c.b());
+        let px = |v: f32| format!("{v}px");
+        let mut m: Vec<(&'static str, String)> = [
+            ("status-nominal", STATUS_NOMINAL),
+            ("status-watch", STATUS_WATCH),
+            ("status-caution", STATUS_CAUTION),
+            ("status-urgent", STATUS_URGENT),
+            ("status-unknown", STATUS_UNKNOWN),
+            ("bg", BG),
+            ("surface", SURFACE),
+            ("surface-raised", SURFACE_RAISED),
+            ("border", BORDER),
+            ("text", TEXT),
+            ("text-muted", TEXT_MUTED),
+            ("text-on-status", TEXT_ON_STATUS),
+            ("accent", ACCENT),
+            ("focus-ring", FOCUS_RING),
+            ("source-sourced", SOURCE_SOURCED),
+            ("source-adapted", SOURCE_ADAPTED),
+            ("source-placeholder", SOURCE_PLACEHOLDER),
+            ("hazard-radiation", HAZARD_RADIATION),
+            ("hazard-isolation", HAZARD_ISOLATION),
+            ("hazard-distance", HAZARD_DISTANCE),
+            ("hazard-gravity", HAZARD_GRAVITY),
+            ("hazard-closed-environment", HAZARD_CLOSED_ENVIRONMENT),
+        ]
+        .into_iter()
+        .map(|(n, c)| (n, hex(c)))
+        .collect();
+        m.extend(
+            [
+                ("radius-sm", RADIUS_SM),
+                ("radius-md", RADIUS_MD),
+                ("radius-lg", RADIUS_LG),
+                ("space-1", SPACE_1),
+                ("space-2", SPACE_2),
+                ("space-3", SPACE_3),
+                ("space-4", SPACE_4),
+                ("space-6", SPACE_6),
+                ("space-8", SPACE_8),
+                ("touch-target", TOUCH_TARGET),
+            ]
+            .into_iter()
+            .map(|(n, v)| (n, px(v))),
+        );
+        m
+    }
+
+    /// Fails when tokens.css gains a token or changes a value that theme.rs does not mirror.
+    #[test]
+    fn theme_mirrors_design_tokens() {
+        let css = include_str!("../../../design/tokens.css");
+        let mirror = mirror();
+        for line in css.lines() {
+            let Some(rest) = line.trim().strip_prefix("--") else {
+                continue;
+            };
+            let Some((name, value)) = rest.split_once(':') else {
+                continue;
+            };
+            let value = value.split(';').next().unwrap_or("").trim().to_lowercase();
+            if name.starts_with("font-") {
+                continue; // font stacks: egui's built-in fonts are used (see above)
+            }
+            let ours = mirror.iter().find(|(n, _)| *n == name);
+            assert_eq!(
+                ours.map(|(_, v)| v.as_str()),
+                Some(value.as_str()),
+                "--{name}"
+            );
+        }
+    }
+
+    #[test]
+    fn statuses_have_distinct_icons_and_words() {
+        let all = [
+            Status::Unknown,
+            Status::Nominal,
+            Status::Watch,
+            Status::Caution,
+            Status::Urgent,
+        ];
+        let looks: Vec<_> = all.iter().map(|s| status_look(*s)).collect();
+        for (i, a) in looks.iter().enumerate() {
+            for b in &looks[i + 1..] {
+                assert_ne!(a.1, b.1, "icon");
+                assert_ne!(a.2, b.2, "word");
+            }
+        }
+    }
 }
