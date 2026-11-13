@@ -3,7 +3,9 @@
 Read the root `AGENTS.md` first. Tasks: `docs/plan.md`, section ENGINE.
 
 **You own:** `crates/core`, `crates/core-wasm`, `crates/api`, the generated `apps/web/src/contract/`, and `apps/web/src/faces/ground/`.
-**Not yours:** `crates/core-ffi` (MOBILE), the rest of `apps/`.
+**Not yours:** the rest of `apps/`. (`crates/core-ffi` would be MOBILE's, and exists only if they start the on-device engine stretch.)
+
+Mobile is React Native and cannot run WASM, so it reaches the engine through your API: `POST /api/assess`, `GET /api/demo` and `GET /api/registry` are part of ENGINE-1, and MOBILE is blocked until they exist.
 
 You hold the contract. Everyone else is blocked when you are slow on a `contract:` issue, so those come before your own tasks.
 

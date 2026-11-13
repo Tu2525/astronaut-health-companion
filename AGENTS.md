@@ -15,19 +15,19 @@ The 48-hour clock is running. Read this file, then the `AGENTS.md` in your own f
 
 ## The three laws
 
-1. **Status is computed once, in `crates/core`.** No thresholds, ranges, status or escalation logic in TypeScript, Dart, egui code or the API. You call the engine and render what it says. If two faces disagree during the demo, we lose.
+1. **Status is computed once, in `crates/core`.** No thresholds, ranges, status or escalation logic in TypeScript (web or mobile), egui code or the API. You call the engine and render what it says. If two faces disagree during the demo, we lose.
 2. **Stay in your folder.** You edit only what the ownership table gives you. Need something elsewhere? Open an issue or a PR request to that owner (see "Asking another owner").
 3. **Simulated data is never called NASA data.** Every range shows its source status (`sourced`, `adapted`, `placeholder`). No medication doses, anywhere.
 
 ## Ownership
 
-| Role | Owns (may edit) | Agent |
-|---|---|---|
-| **ENGINE** | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract` (generated), `apps/web/src/faces/ground` | Claude |
-| **WEB** | `apps/web` except `src/contract` and `src/faces/ground` | Claude |
-| **SAFE** | `apps/egui`, `apps/desktop` | Claude |
-| **MOBILE** | `apps/mobile`, `crates/core-ffi` | Codex |
-| **PLANNER** | root files, `docs/`, `design/`, `.github/` | Claude (planner) |
+| Role | Owns (may edit) |
+|---|---|
+| **ENGINE** | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract` (generated), `apps/web/src/faces/ground` |
+| **WEB** | `apps/web` except `src/contract` and `src/faces/ground` |
+| **SAFE** | `apps/egui`, `apps/desktop` |
+| **MOBILE** | `apps/mobile` (and `crates/core-ffi` only if the on-device engine stretch is started) |
+| **PLANNER** | root files, `docs/`, `design/`, `.github/` |
 
 Root `Cargo.toml`: each owner may add **only their own crate** to `members`, nothing else.
 People, decisions and cover are in `TEAM.md`. Drivers: put your GitHub handle there in your first PR.

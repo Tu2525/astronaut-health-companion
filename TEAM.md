@@ -10,11 +10,12 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 |---|---|---|---|---|---|
 | **PLANNER / reviewer** | @Tu2525 | Claude (planner, Opus for questions) | Reviews and merges every PR. Plan, scope cuts, answers in `QUESTIONS.md`, design references, sources, demo video, submission | root, `docs/`, `design/`, `.github/` | PLAN-1..5 |
 | **ENGINE** | _TBD_ | NA | The contract and the engine: every status decision. Ground Station backend and its screens. Answers `contract:` issues within 15 min | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract`, `apps/web/src/faces/ground` | ENGINE-1..10 |
-| **WEB** | _TBD_ | NA | The hero Crew App: body figure, measure, guidance, today, crew, comms, trends, library, settings. The public demo link looking good | `apps/web` (except ENGINE's two folders and `public/safe/`) | WEB-1..13 |
+| **WEB** | @AMRYB | NA | The hero Crew App: body figure, measure, guidance, today, crew, comms, trends, library, settings. The public demo link looking good | `apps/web` (except ENGINE's two folders and `public/safe/`) | WEB-1..13 |
 | **SAFE** | _TBD_ | NA | Safe-Mode Console (native + `/safe/` in the browser), Pages deploy, Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..7 |
-| **MOBILE** | _TBD_ | NA | Flutter companion: camera pulse, Health Connect. Honours the T+6 kill switch | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
+| **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile` | MOBILE-1..6 |
 
-Unassigned teammates: @SamaWaheed, @Mostafa-Emad-El-Din, @AMRYB (one role each above).
+Still unassigned: ENGINE and SAFE, between @SamaWaheed and @Mostafa-Emad-El-Din.
+@AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
 
 ## Who decides
 
@@ -46,7 +47,7 @@ Unassigned teammates: @SamaWaheed, @Mostafa-Emad-El-Din, @AMRYB (one role each a
 | Role | Covered by | Notes |
 |---|---|---|
 | ENGINE | PLANNER | contract issues cannot wait |
-| WEB | SAFE first, then MOBILE after the kill switch | WEB has the most screens; helpers take whole screens (WEB-9, WEB-11, WEB-12), in their own folders |
+| WEB | SAFE first; @AMRYB's own mobile time after the kill switch | WEB has the most screens; helpers take whole screens (WEB-9, WEB-11, WEB-12), in their own folders |
 | SAFE | ENGINE | both are Rust |
 | MOBILE | nobody | it is cut instead |
 
