@@ -1,0 +1,28 @@
+name: pr-screenshots
+# UI pull requests must show what they look like. See AGENTS.md, "Screenshots in PRs".
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    paths:
+      - "apps/web/**"
+      - "apps/egui/**"
+      - "apps/mobile/**"
+      - "apps/desktop/**"
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR description contains a screenshot
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Drop HTML comments first: the PR template's own hint contains an example image link.
+          BODY=$(printf '%s' "$BODY" | perl -0pe 's/<!--.*?-->//gs')
+          if printf '%s' "$BODY" | grep -qiE '!\[[^]]*\]\([^)]+\)|<img [^>]*src='; then
+            echo "Screenshot found."
+          elif printf '%s' "$BODY" | grep -qiE '^No visual change: .{10,}'; then
+            echo "Declared as no visual change."
+          else
+            echo "::error::This PR touches a UI folder but its description has no image. Add screenshots (AGENTS.md, 'Screenshots in PRs'), or a line 'No visual change: <reason>'."
+            exit 1
+          fi

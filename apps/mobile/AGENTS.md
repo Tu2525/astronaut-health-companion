@@ -43,6 +43,7 @@ Web is the hero and has the same driver. If WEB is behind its milestone, mobile 
 - Pulse signal processing lives in TypeScript (average red channel per frame, band-pass, peak count). Keep it simple and label the result an estimate. `ponytail:` naive peak counting; fine for a demo, not a medical measurement.
 - Colours: one file `src/theme.ts` mirroring `design/tokens.css` (same names). No colour literals anywhere else. Check `design/references/` for `mobile-*` files first.
 - Status shown as colour + icon + word, same vocabulary as everywhere else.
+- Every PR includes screenshots you took from the device or emulator with `adb exec-out screencap -p` (root `AGENTS.md`, "Screenshots in PRs").
 - The API base URL comes from one config value (`EXPO_PUBLIC_API_URL`), never hard-coded in screens.
 - `package.json` scripts CI expects: `typecheck` (`tsc --noEmit`), `lint`, `test`.
 

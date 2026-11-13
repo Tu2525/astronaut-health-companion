@@ -25,6 +25,7 @@ It is deliberately minimal: one status board, a quick-entry panel, a protocol ca
 - Colours: one file `src/theme.rs` mirroring `design/tokens.css` (same names). No colour literals anywhere else. Check `design/references/` for `safe-*` files first.
 - Status is shown as colour + icon + word, same vocabulary as the web (`docs/contract.md` section 2).
 - On the demo seed your board must show exactly the statuses the web app shows. Compare before every PR.
+- Every PR includes screenshots you took of the console (root `AGENTS.md`, "Screenshots in PRs"); put the web app's view of the same state beside it.
 - Getting the WASM output into `apps/web/public/safe/` needs one build step on the web side: agree it with WEB, do not edit their `package.json` yourself.
 - `apps/desktop` is Tauri v2 around `apps/web/dist` and is the first thing cut if you are late. No logic in the shell.
 
