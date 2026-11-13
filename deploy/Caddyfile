@@ -1,5 +1,5 @@
-# Replace api.example.com with the real hostname (DEVOPS step 4d). Caddy gets the HTTPS certificate itself.
+# Replace ahc12.duckdns.org with the real hostname (DEVOPS step 4d). Caddy gets the HTTPS certificate itself.
 # CORS and basic auth are done by the API (env vars), Caddy only terminates TLS.
-api.example.com {
+ahc12.duckdns.org {
 	reverse_proxy 127.0.0.1:8080
 }
