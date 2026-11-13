@@ -64,10 +64,46 @@ Fill in the template. A reviewer who has not seen your session must be able to u
 - **What**: the one thing this PR does, in plain words.
 - **Why**: which task ID from `docs/plan.md` (for example `WEB-3`) and which demo story step it serves.
 - **How to test**: exact commands, then what to click and what you should see.
-- **Screenshots or a short clip** for any UI change.
+- **Screenshots** for any UI change: required, taken by you, rules below.
 - Say what you did **not** do or could not verify. Do not claim tests pass unless you ran them.
 
 Before opening the PR: run your area's checks (in your folder's `AGENTS.md`), then have a subagent review your diff.
+
+### Screenshots in PRs (required for anything visual)
+
+The reviewer judges UI by looking at it. **The agent takes the photos itself**; do not leave it to the driver.
+
+**When:** every PR that touches `apps/web`, `apps/egui`, `apps/mobile` or `apps/desktop`. CI (`pr-screenshots`) fails the PR if the description has no image. If the change truly cannot be seen (a refactor, a type fix), write a line `No visual change: <reason>` instead.
+
+**What to capture** (real app, running, on the demo seed; never a mock-up or an edited image):
+
+- Every screen or component the PR adds or changes.
+- Each state the PR handles: at least the normal one and the flagged one; add stale, empty, error or blackout when the PR deals with them.
+- For a fix or a restyle: **before and after**, side by side.
+- Web: once at desktop width and once at phone width (about 390 px).
+- If a reference exists in `design/references/`, put it next to your screenshot.
+
+**How to capture**
+
+| Face | How |
+|---|---|
+| Web, ground | Run `npm run dev`, open it in your browser tool (Claude Code's browser, Playwright, or Chrome DevTools) and screenshot the page |
+| Safe mode | Screenshot the WASM build in the browser the same way, or the native window |
+| Mobile | `adb exec-out screencap -p > shot.png` from the device or emulator |
+
+**Where they go**
+
+1. Save PNGs in `docs/screenshots/<area>/`, named `<TASK-ID>-<screen>-<state>.png`, for example `docs/screenshots/web/WEB-2-body-flagged.png`. Keep each under about 500 KB (crop, do not paste a 4K desktop).
+2. Commit them in the same PR. They stay in the repo on purpose: PITCH uses them for the deck.
+3. In the PR description, under **Screenshots**, embed each one by commit, so the link survives the branch being deleted:
+
+```
+![Body view, flagged, desktop](https://github.com/Tu2525/astronaut-health-companion/blob/<commit-sha>/docs/screenshots/web/WEB-2-body-flagged.png?raw=true)
+```
+
+4. Put one line of caption under each: what it shows and what to look at.
+
+Look at your own screenshot before you post it. If it shows a broken layout, an error overlay or an empty page, the PR is not ready.
 
 ## Use subagents
 
@@ -95,4 +131,5 @@ Unsure about a decision that `AGENTS.md` and `docs/` do not settle? Append it to
 - Shows status as **colour + icon + word**, never colour alone.
 - No raw colours: every colour is a token from `design/tokens.css` (or your face's one mirror file). Matches the reference in `design/references/` if one exists.
 - No logic that belongs in the engine.
+- UI change: screenshots are in the PR description (see "Screenshots in PRs").
 - PR description lets @Tu2525 test it in two minutes.

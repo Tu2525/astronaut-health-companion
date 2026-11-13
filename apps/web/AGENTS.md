@@ -51,4 +51,4 @@ npm run dev
 npm run lint && npm run build
 ```
 
-For any UI PR: run it, look at it in the browser, attach a screenshot. "It compiles" is not tested.
+For any UI PR: run it, look at it in the browser, and take the screenshots yourself (desktop and phone width, each changed state) following "Screenshots in PRs" in the root `AGENTS.md`. CI rejects a UI PR without them. "It compiles" is not tested.
