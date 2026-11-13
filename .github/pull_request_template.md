@@ -23,6 +23,7 @@
 - [ ] mobile
 - [ ] pitch
 - [ ] docs/ci
+- [ ] deploy
 
 ## Checklist
 - [ ] Stays inside my owned folder

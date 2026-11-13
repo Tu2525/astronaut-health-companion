@@ -29,6 +29,8 @@ You hold the contract. Everyone else is blocked when you are slow on a `contract
 - `core` stays dependency-light (serde, serde_json, ts-rs) so it compiles to WASM and Android without surprises.
 - Ground face: it lives in the web app, so follow `apps/web/AGENTS.md` conventions there and do not touch files outside `src/faces/ground/`.
 
+Deploying the API is DEVOPS's job (DEVOPS-3). Make it easy: one binary, config only through env vars (`AHC_BIND`, `AHC_GROUND_USER`, `AHC_GROUND_PASS`, `AHC_DATA_DIR`), and list them in your ENGINE-1 PR.
+
 ## Commands
 
 ```bash

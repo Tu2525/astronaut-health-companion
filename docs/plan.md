@@ -28,10 +28,9 @@ Each task = one PR unless it says otherwise. PR title uses the task's area; ment
 | ENGINE-6 | Source the registry: replace placeholder ranges with cited NASA / agency sources where they exist, mark the rest honestly; add env-specific ranges where justified | each indicator has a real citation or stays `placeholder` on purpose; list in `docs/sources.md` |
 | ENGINE-7 | Time-to-help in core: given delay and escalation, say whether waiting for ground is safe (ladder wording by environment) | field on `Flag`, test per environment |
 | ENGINE-8 | Second and third seeded crews (lunar base, station) producing `Score`s for the leaderboard | `demo()` exposes crew scores, no values |
-| ENGINE-9 | Deploy API to the VM, HTTPS, env-based auth | public `/api/health` |
-| ENGINE-10 | C1 crew overview, C6 event timeline with conflict line ("note arrived 40 min after your action") | stretch |
+| ENGINE-9 | C1 crew overview, C6 event timeline with conflict line ("note arrived 40 min after your action") | stretch |
 
-Order: 1, 2, 3 by M2. 4, 5 by M3. 6, 7, 8, 9 by M4.
+Order: 1, 2, 3 by M2. 4, 5 by M3. 6, 7, 8 by M4. Deploying the API is DEVOPS-3: give them the run command and the env vars it reads.
 You are also on call for `contract:` issues: answer within 15 minutes, they block other people.
 
 ## WEB (`apps/web`)
@@ -64,11 +63,10 @@ WEB has the most screens: run independent screens in parallel subagents once WEB
 | SAFE-2 | B1 Status board: indicator table (name, value, status word + icon, last measured), overall, flags with escalation step, comms line, SAFE MODE banner; deliberate high-contrast style | matches web statuses exactly |
 | SAFE-3 | WASM build with trunk, output to `apps/web/public/safe/` at build time (coordinate the one line in web's build with WEB), storage adapter: localStorage on web, JSON file native | `/safe/` loads next to the web app and shows the same log |
 | SAFE-4 | B2 Quick entry (keyboard-first) appends a `reading`; B3 Protocol card from flag actions | reading entered in `/safe/` appears in the web app |
-| SAFE-5 | Pages deploy workflow: build web + safe, publish (PLANNER reviews `.github` changes) | public link |
-| SAFE-6 | `apps/desktop` Tauri v2 shell around the web build, "Enter safe mode" launches the native console | Windows build runs |
-| SAFE-7 | Help WEB: take WEB-9 or WEB-11 if free | |
+| SAFE-5 | `apps/desktop` Tauri v2 shell around the web build, "Enter safe mode" launches the native console | Windows build runs |
+| SAFE-6 | Help WEB: take WEB-9 or WEB-11 if free | |
 
-Order: 1 by M0. 2 by M1. 3, 4 by M3 (aim for M2). 5 by M4. 6 is cut first if late.
+Order: 1 by M0. 2 by M1. 3, 4 by M3 (aim for M2). 5 is cut first if late. Publishing `/safe/` is DEVOPS-2: give them the trunk command that works.
 
 ## MOBILE (`apps/mobile`), React Native
 
@@ -92,6 +90,20 @@ If the kill switch fires: keep whatever runs, record it, and the time goes to WE
 | PLAN-2 | Verify the challenge Resources tab and what NASA OSDR actually offers; feed ENGINE-6 |
 | PLAN-3 | `docs/sources.md` and the "NASA data used" + "AI use" sections of the submission (AI used to build it, AI inside it) |
 
+## DEVOPS (`.github/`, `deploy/`): @Tu2525 and @m7mdnasrr
+
+| ID | Task | Done when |
+|---|---|---|
+| DEVOPS-1 | Keep CI green and quick: fix workflow problems, add build steps owners ask for (`devops:` issues), confirm `pr-screenshots` works on the first UI PR | every PR gets a result in a few minutes |
+| DEVOPS-2 | Pages deploy workflow: build the web app with the engine WASM, build the safe-mode WASM into `/safe/`, publish on every push to `main` | public link loads on a clean browser, `/safe/` included (needed by M4, aim for M2 so judges' link exists early) |
+| DEVOPS-3 | API on the Oracle VM: build or copy the `ahc-api` binary, systemd service, HTTPS (reverse proxy), basic-auth and CORS from env vars, files in `deploy/` | public `/api/health` answers over HTTPS; restart survives a reboot |
+| DEVOPS-4 | Secrets and settings: Actions secrets, Pages settings, branch protection, the web app's API URL as a build variable | nothing secret in the repo; documented in `deploy/README.md` |
+| DEVOPS-5 | Stay-up plan: both links must work until winners are announced (January 2027); a simple uptime check and a note on how to redeploy | written in `deploy/README.md` |
+| DEVOPS-6 | Release for submission: tag the commit the video was recorded on, attach the mobile APK if mobile lives | tag exists, links in the submission |
+
+Order: 1 always. 2 as soon as WEB-1 is merged. 3 after ENGINE-3. 4, 5 by M4. 6 at M5.
+The repo is private; GitHub Pages on a private repo needs a paid plan or the repo made public. Decide which before DEVOPS-2.
+
 ## PITCH (`pitch/`): @Tu2525 and @m7mdnasrr
 
 Rules and folder layout: `pitch/README.md`.
@@ -110,11 +122,11 @@ Start the deck outline and the video script now; they do not depend on code. Scr
 
 ## Cut lines (in this order)
 
-1. Tauri desktop shell (SAFE-6): show the web app in a browser.
+1. Tauri desktop shell (SAFE-5): show the web app in a browser.
 2. Mobile (after the kill switch).
 3. Local AI (WEB-13).
 4. Trends multi-indicator view (keep the single indicator chart).
-5. Ground overview and timeline (ENGINE-10).
+5. Ground overview and timeline (ENGINE-9).
 6. Earth Mode, onboarding flow, buddy checks.
 
 Never cut: body figure, guided measurement, guidance with ladder, delayed ground loop, safe mode in the browser, source honesty.
@@ -127,6 +139,7 @@ Never cut: body figure, guided measurement, guidance with ladder, delayed ground
 | Contract churn | Only ENGINE edits it; `!` in the PR title; announce in chat |
 | One driver for WEB and MOBILE | WEB first; mobile kill switch; SAFE takes whole web screens when free |
 | WASM toolchain eats time | WEB-1 and SAFE-3 are first-hour checks; ask ENGINE at once if stuck |
+| Deploy left to the last hour | DEVOPS-2 starts right after WEB-1, with an empty page if need be |
 | Merge queue jams | Small PRs, one feature each, PLAN-1 |
 | Demo breaks offline | Definition of done: works with API and AI off |
 | Wrong medical claims | Placeholder labels, no doses, engine text only |

@@ -8,11 +8,12 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 
 | Role | Person (GitHub) | Agent | Responsible for | Folders | Tasks |
 |---|---|---|---|---|---|
-| **PLANNER / reviewer** | @Tu2525 | Claude (planner, Opus for questions) | Reviews and merges every PR. Plan, scope cuts, answers in `QUESTIONS.md`, design references, sources | root, `docs/`, `design/`, `.github/` | PLAN-1..3 |
-| **ENGINE** | @Mostafa-Emad-El-Din | NA | The contract and the engine: every status decision. Ground Station backend and its screens. Answers `contract:` issues within 15 min | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract`, `apps/web/src/faces/ground` | ENGINE-1..10 |
+| **PLANNER / reviewer** | @Tu2525 | Claude (planner, Opus for questions) | Reviews and merges every PR. Plan, scope cuts, answers in `QUESTIONS.md`, design references, sources | root, `docs/`, `design/` | PLAN-1..3 |
+| **ENGINE** | @Mostafa-Emad-El-Din | NA | The contract and the engine: every status decision. Ground Station backend and its screens. Answers `contract:` issues within 15 min | `crates/core`, `crates/core-wasm`, `crates/api`, `apps/web/src/contract`, `apps/web/src/faces/ground` | ENGINE-1..9 |
 | **WEB** |@AMRYB | NA | The hero Crew App: body figure, measure, guidance, today, crew, comms, trends, library, settings. The public demo link looking good | `apps/web` (except ENGINE's two folders and `public/safe/`) | WEB-1..13 |
-| **SAFE** | @SamaWaheed | NA | Safe-Mode Console (native + `/safe/` in the browser), Pages deploy, Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..7 |
+| **SAFE** | @SamaWaheed | NA | Safe-Mode Console (native + `/safe/` in the browser), Tauri desktop shell | `apps/egui`, `apps/desktop`, `apps/web/public/safe/` | SAFE-1..6 |
 | **MOBILE** | @AMRYB | NA | React Native companion: camera pulse, Health Connect. Honours the T+6 kill switch. Comes second to WEB | `apps/mobile`, `crates/core-ffi` | MOBILE-1..6 |
+| **DEVOPS** | @Tu2525, @m7mdnasrr | NA | CI, deploys and keeping it up: GitHub Actions, the public web link (Pages, includes `/safe/`), the API on the VM, secrets, repo settings | `.github/`, `deploy/` | DEVOPS-1..6 |
 | **PITCH** | @Tu2525, @m7mdnasrr | NA | Everything judges see besides the product: travel case, PowerPoint deck, brag video, PDFs and presentations, demo video, submission page | `pitch/` | PITCH-1..7 |
 
 @AMRYB drives two roles: one session and one worktree per role, never one session editing both folders.
@@ -33,8 +34,9 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 
 | Job | Owner | Helps |
 |---|---|---|
-| Deployed web link (GitHub Pages, includes `/safe/`) | SAFE | WEB |
-| Deployed API (Oracle VM) | ENGINE | PLANNER |
+| Deployed web link (GitHub Pages, includes `/safe/`) | DEVOPS | WEB and SAFE supply working build commands |
+| Deployed API (Oracle VM) | DEVOPS | ENGINE supplies the binary and its env vars |
+| CI staying green and fast | DEVOPS | each owner fixes failures in their own code |
 | The web build step that pulls in the safe-mode WASM | WEB (their `package.json`) | SAFE supplies the command |
 | Demo seed data and its tests | ENGINE | everyone reports mismatches |
 | Faces agreeing on status | ENGINE | SAFE and MOBILE compare against web before each PR |
@@ -51,5 +53,6 @@ Fill in the **Person** column (first PR by each driver, or @Tu2525 edits it). A 
 | SAFE | ENGINE | both are Rust |
 | MOBILE | nobody | it is cut instead |
 | PITCH | the two owners cover each other | |
+| DEVOPS | the two owners cover each other | |
 
 Helping in someone else's folder: only on a task they handed you, in a folder they named, and say so in the PR.

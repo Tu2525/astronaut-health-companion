@@ -27,8 +27,9 @@ The 48-hour clock is running. Read this file, then the `AGENTS.md` in your own f
 | **WEB** | `apps/web` except `src/contract` and `src/faces/ground` |
 | **SAFE** | `apps/egui`, `apps/desktop` |
 | **MOBILE** | `apps/mobile` (and `crates/core-ffi` only if the on-device engine stretch is started) |
+| **DEVOPS** | `.github/` (workflows, templates), `deploy/` |
 | **PITCH** | `pitch/` (deck, PDFs, brag video, travel case) |
-| **PLANNER** | root files, `docs/`, `design/`, `.github/` |
+| **PLANNER** | root files, `docs/`, `design/` |
 
 Root `Cargo.toml`: each owner may add **only their own crate** to `members`, nothing else.
 People, decisions and cover are in `TEAM.md`. Drivers: put your GitHub handle there in your first PR.
@@ -37,7 +38,7 @@ People, decisions and cover are in `TEAM.md`. Drivers: put your GitHub handle th
 
 - **One worktree per agent**, so nobody overwrites anybody's uncommitted files:
   `git worktree add ../ahc-<area> -b <area>/<topic> origin/main`
-- **Branches:** `<area>/<short-topic>`, area is one of `core api web ground egui desktop mobile pitch docs ci`. Example: `web/body-figure`.
+- **Branches:** `<area>/<short-topic>`, area is one of `core api web ground egui desktop mobile pitch docs ci deploy`. Example: `web/body-figure`.
 - **Never push to `main`.** Everything lands through a PR reviewed by @Tu2525.
 - **One feature or one fix per PR.** Small (aim under ~400 changed lines; generated files do not count). If you did two things, open two PRs.
 - **Rebase on `origin/main` before opening a PR and whenever main moves.** Never force-push someone else's branch.
@@ -118,6 +119,7 @@ Use subagents (Claude Code: the Agent/Task tool; Codex: its equivalent) instead 
 
 - **Contract change** (new field, type, engine behaviour): open an issue titled `contract: <what you need>` with the exact shape you want and why. ENGINE answers fast and ships it as its own PR. Do not work around it by computing things locally.
 - Until it lands, mock **the data**, not the logic: hard-code a JSON value of the shape you asked for.
+- **CI or deploy change** (a new build step, a secret, a workflow fix): open an issue titled `devops: <what you need>` with the exact command that works locally. DEVOPS owns `.github/` and `deploy/`; do not edit workflows yourself.
 - Blocked more than 30 minutes: say so in the team chat and move to your next task.
 
 ## Questions
