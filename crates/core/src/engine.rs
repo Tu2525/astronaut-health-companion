@@ -25,7 +25,18 @@ const ALL_REGIONS: [Region; 10] = [
 const BASELINE_MIN: usize = 5;
 
 pub fn assess(input: &AssessInput) -> Assessment {
-    let registry = input.registry.clone().unwrap_or_else(crate::registry);
+    let built_in;
+    let registry = match &input.registry {
+        Some(registry) => registry.as_slice(),
+        None => {
+            built_in = crate::registry();
+            &built_in
+        }
+    };
+    assess_with_registry(input, registry)
+}
+
+pub(crate) fn assess_with_registry(input: &AssessInput, registry: &[Indicator]) -> Assessment {
     let mut events: Vec<&Event> = input
         .events
         .iter()
@@ -44,7 +55,7 @@ pub fn assess(input: &AssessInput) -> Assessment {
 
     let mut indicators = Vec::new();
     let mut flags = Vec::new();
-    for ind in &registry {
+    for ind in registry {
         let (st, escalation) = assess_indicator(ind, &events, input.now_met_s);
         if st.status >= Status::Watch {
             flags.push(Flag {
@@ -214,7 +225,7 @@ fn assess_indicator(ind: &Indicator, events: &[&Event], now: f64) -> (IndicatorS
     let age_h = (now - last.met_s) / 3600.0;
     let v = last.value;
     let outside = |lo: f64, hi: f64, x: f64| x < lo || x > hi;
-    (st.status, st.reason) = if age_h > ind.stale_after_h {
+    (st.status, st.reason) = if reading_is_stale(ind, now, last.met_s) {
         (
             Status::Unknown,
             format!("Stale: last measured {age_h:.0} h ago."),
@@ -272,6 +283,10 @@ fn assess_indicator(ind: &Indicator, events: &[&Event], now: f64) -> (IndicatorS
         _ => Escalation::Monitor,
     };
     (st, escalation)
+}
+
+pub(crate) fn reading_is_stale(indicator: &Indicator, now_met_s: f64, last_met_s: f64) -> bool {
+    (now_met_s - last_met_s) / 3600.0 > indicator.stale_after_h
 }
 
 fn next_step(e: Escalation, s: Status) -> &'static str {

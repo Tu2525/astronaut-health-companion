@@ -13,6 +13,15 @@ pub fn assess(input_json: &str) -> Result<String, JsError> {
     ahc_core::assess_json(input_json).map_err(|e| JsError::new(&e))
 }
 
+/// AssessInput JSON -> Task[] JSON.
+#[wasm_bindgen]
+pub fn due_tasks(input_json: &str) -> Result<String, JsError> {
+    let input: ahc_core::AssessInput =
+        serde_json::from_str(input_json).map_err(|e| JsError::new(&e.to_string()))?;
+    ahc_core::validate(&input).map_err(|e| JsError::new(&e))?;
+    Ok(json(&ahc_core::due_tasks(&input)))
+}
+
 /// Indicator[] JSON.
 #[wasm_bindgen]
 pub fn registry() -> String {
