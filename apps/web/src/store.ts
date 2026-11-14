@@ -22,12 +22,16 @@ export function createStore() {
     crew_id: seed.crew_id, environment: "transit", one_way_delay_s: 20,
     role: "astronaut", ai_enabled: false, met_offset_s: 0,
   };
+  // Corrupt storage must not brick the offline app: fall back to defaults and the seed.
+  const parse = <T>(raw: string | null): T | null => {
+    try { return raw === null ? null : (JSON.parse(raw) as T); } catch { return null; }
+  };
   const readSettings = (): Settings => ({
-    ...defaults, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}"),
+    ...defaults, ...parse<Partial<Settings>>(localStorage.getItem(SETTINGS_KEY)),
   });
   const readEvents = (): Event[] => {
-    const saved = localStorage.getItem(EVENTS_KEY);
-    if (saved !== null) return JSON.parse(saved);
+    const saved = parse<Event[]>(localStorage.getItem(EVENTS_KEY));
+    if (Array.isArray(saved)) return saved;
     localStorage.setItem(EVENTS_KEY, JSON.stringify(seed.events));
     return seed.events;
   };
