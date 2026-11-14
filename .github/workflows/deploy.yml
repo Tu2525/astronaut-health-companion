@@ -27,6 +27,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - if: steps.guard.outputs.exists == 'true'
         uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Pinned: "latest" sometimes resolved to v0.9.1, which rejects --no-opt.
+          version: v0.15.1
       - if: steps.guard.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
