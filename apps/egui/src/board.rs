@@ -4,10 +4,6 @@
 
 use ahc_core::{Assessment, Environment, Escalation, Event, Indicator, SourceStatus, Status};
 
-/// One-way comms delay until SAFE-3 reads `ahc.settings.v1`.
-/// Demo default from `docs/architecture.md` ("Comms delay"); see `Q-SAFE-2`.
-pub const DEMO_ONE_WAY_DELAY_S: f64 = 20.0;
-
 /// UIs show the top one or two flags (`docs/contract.md` section 4).
 const MAX_FLAGS: usize = 2;
 
@@ -65,7 +61,7 @@ pub fn ladder_step(e: Escalation) -> usize {
 }
 
 /// `71.3 bpm`, but `3.0/5` for scores.
-fn format_value(v: f64, unit: &str) -> String {
+pub fn format_value(v: f64, unit: &str) -> String {
     if unit.is_empty() || unit.starts_with('/') {
         format!("{v:.1}{unit}")
     } else {
@@ -172,6 +168,7 @@ impl Board {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storage::DEMO_ONE_WAY_DELAY_S;
     use ahc_core::{assess, demo, registry, AssessInput, Confidence, EventKind};
 
     fn input(events: Vec<Event>) -> AssessInput {

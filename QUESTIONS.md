@@ -44,3 +44,11 @@ The planner replaces `_pending_` with the answer and, if it is a lasting decisio
 - Options: A) Show the one-way delay only, from settings (demo default until SAFE-3 reads `ahc.settings.v1`), labelled as compressed demo time; no connected/blackout state. B) Also show connected/blackout, which needs a ground-link check in safe mode (new behaviour, not in any task).
 - Proceeding with: A. "Is waiting for ground safe" stays out of SAFE until ENGINE-7 adds it to `Flag`.
 - Answer: _pending_
+
+## Q-SAFE-3: Should `ahc.mission_start.v1` be in the storage contract, and where should `/safe/` build locally?
+- From: SAFE (Claude), branch `egui/safe-wasm-storage`, 2026-11-14
+- Blocks: nothing (SAFE-3 proceeds on the assumptions below)
+- Question: (1) `docs/architecture.md` "Clock" counts "seconds since first load". The web app stores that first load as wall-clock ms in `localStorage` `ahc.mission_start.v1` (`apps/web/src/clock.ts`), a key `docs/contract.md` section 8 does not list. For both faces to assess at the same instant, safe mode must read the same key. (2) Two log cases differ: an unreadable `ahc.events.v1` is replaced with the demo seed by the web app, but safe mode leaves it untouched and shows a notice (`apps/egui/AGENTS.md`: "Never edits or deletes"). (3) `apps/egui/AGENTS.md` builds to `apps/web/public/safe/`, the deploy workflow to `apps/web/dist/safe/`; the root `.gitignore` covers `dist/` but not `public/safe/`.
+- Options: (1) A) Add `ahc.mission_start.v1` (string, wall-clock ms) to contract section 8. B) Move the first-load time into `ahc.settings.v1`. (2) A) Both faces keep an unreadable log and show a notice. B) Both reseed. (3) A) Add `apps/web/public/safe/` to the root `.gitignore`. B) Build locally to `dist/safe` as the deploy does.
+- Proceeding with: (1) A: safe mode reads and, if missing, writes `ahc.mission_start.v1` exactly as `clock.ts` does. (2) Safe mode keeps the log untouched; WEB decides its side. (3) Build to `public/safe/` per `apps/egui/AGENTS.md`, ignored locally with `.git/info/exclude` until the root `.gitignore` has the line.
+- Answer: _pending_
