@@ -123,7 +123,7 @@ XP: measurement, check-in, report sent = 10; follow-up action = 15; symptom repo
 
 ## 7. Demo seed
 
-`demo()` returns `{ crew_id: "cdr", now_met_s, launch_earth_ms, events, kit }`: Mars transit, mission day 143, 06:12, 15 days of history. Opening state (asserted by tests in `crates/core/src/lib.rs`):
+`demo()` returns `{ crew_id: "cdr", now_met_s, launch_earth_ms, events, kit, crew_scores }`: Mars transit, mission day 143, 06:12, 15 days of history. `crew_scores` is a `Score[]` for `cdr`, `lunar-base`, and `station`, computed from simulated activity. The event log contains only the active crew member's events. As new activity is recorded, use `score` to refresh that crew member's leaderboard row. Opening state (asserted by tests in `crates/core/src/lib.rs`):
 
 - heart rate `watch` (creeping up), sleep `watch`, mood and stress `watch`
 - blood pressure and glucose `unknown` (stale: this is why the scheduler prompts a BP check)
@@ -148,7 +148,7 @@ Base `/api`. JSON. CORS allows all origins by default. The astronaut side must w
 |---|---|---|---|
 | GET | `/api/health` | none | `{ "ok": true }` |
 | POST | `/api/assess` | none | body `AssessInput`; returns `Assessment` (`ahc_core::assess_json`). Used by mobile |
-| GET | `/api/demo` | none | `{ crew_id, now_met_s, launch_earth_ms, events, kit }`, same as the WASM `demo()` |
+| GET | `/api/demo` | none | `{ crew_id, now_met_s, launch_earth_ms, events, kit, crew_scores }`, same as the WASM `demo()` |
 | GET | `/api/registry` | none | `Indicator[]` |
 | POST | `/api/reports` | none | body `Report`; server stores it; 201. Retrying the same report is idempotent. Reusing its ID with different contents returns 409. |
 | GET | `/api/reports` | basic | `Report[]` whose `deliver_at_earth_ms <= server now` (the delay is enforced here) |

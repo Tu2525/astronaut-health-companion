@@ -1,7 +1,7 @@
 //! Seeded demo history: Mars transit, mission day 143. SIMULATED data, never call it NASA data.
 //! Deterministic so every face shows the same story.
 
-use crate::types::*;
+use crate::{gamify, types::*};
 
 pub const CREW_ID: &str = "cdr";
 /// Mission day 143, 06:12.
@@ -18,15 +18,35 @@ pub struct Demo {
     pub launch_earth_ms: f64,
     pub events: Vec<Event>,
     pub kit: Vec<KitItem>,
+    pub crew_scores: Vec<Score>,
 }
 
 pub fn seed() -> Demo {
+    let events = events();
+    let mut crew_scores = vec![gamify::score(CREW_ID, &gamify::activities(&events))];
+    let mission_day = (NOW_MET_S / 86_400.0).floor();
+    for (crew_id, active_days, daily_measurements) in
+        [("lunar-base", 9_u32, 4_u32), ("station", 11_u32, 3_u32)]
+    {
+        let activities: Vec<_> = (0..active_days)
+            .flat_map(|days_ago| {
+                let morning_met_s = (mission_day - f64::from(days_ago)) * 86_400.0 + 5.0 * 3600.0;
+                (0..daily_measurements).map(move |index| Activity {
+                    crew_id: crew_id.into(),
+                    met_s: morning_met_s + f64::from(index) * 60.0,
+                    kind: ActivityKind::Measurement,
+                })
+            })
+            .collect();
+        crew_scores.push(gamify::score(crew_id, &activities));
+    }
     Demo {
         crew_id: CREW_ID,
         now_met_s: NOW_MET_S,
         launch_earth_ms: LAUNCH_EARTH_MS,
-        events: events(),
+        events,
         kit: kit(),
+        crew_scores,
     }
 }
 
@@ -152,4 +172,31 @@ pub fn events() -> Vec<Event> {
         );
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn demo_leaderboard_exposes_scores_and_only_the_primary_crew_events() {
+        let demo = seed();
+        assert!(demo.events.iter().all(|event| event.crew_id == CREW_ID));
+        let json = serde_json::to_value(&demo).unwrap();
+        let scores = json["crew_scores"].as_array().unwrap();
+        assert_eq!(scores.len(), 3);
+        assert_eq!(
+            scores[0],
+            serde_json::to_value(gamify::score(CREW_ID, &gamify::activities(&demo.events)))
+                .unwrap()
+        );
+        assert_eq!(
+            scores[1],
+            serde_json::json!({"crew_id":"lunar-base", "xp":360, "level":1, "streak_days":9})
+        );
+        assert_eq!(
+            scores[2],
+            serde_json::json!({"crew_id":"station", "xp":330, "level":1, "streak_days":11})
+        );
+    }
 }
