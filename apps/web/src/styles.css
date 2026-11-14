@@ -124,6 +124,8 @@ button:disabled { color: var(--text-muted); cursor: not-allowed; }
 @media (max-width: 1180px) { .tb-hide { display: none; } }
 @media (max-width: 720px) {
   .top-bar { gap: var(--space-3); padding: 0 var(--space-3); }
+  /* Mission day would push the bar past 390 px, widening the page and hiding the tab bar. */
+  .top-bar > .tb-item:not(.top-status) { display: none; }
   .brand { letter-spacing: .08em; }
   .safe-link { padding-inline: var(--space-2); }
   .shell { display: block; padding: var(--space-3); padding-bottom: calc(var(--touch-target) + 2 * var(--space-6) + env(safe-area-inset-bottom)); }
