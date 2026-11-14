@@ -390,15 +390,27 @@ fn flag_card(ui: &mut egui::Ui, f: &FlagCard) {
     });
 }
 
+/// Outlined word, sized to its text. Painted by hand rather than with a `Frame`:
+/// in a `Grid` a frame grows to the previous frame's row height, so one tall frame
+/// (the first WASM frame is laid out at a tiny canvas size) kept every row tall for good.
 fn source_chip(ui: &mut egui::Ui, s: ahc_core::SourceStatus) {
     let c = theme::source_colour(s);
-    Frame::new()
-        .stroke(Stroke::new(1.0_f32, c))
-        .corner_radius(CornerRadius::same(theme::RADIUS_SM as u8))
-        .inner_margin(Margin::symmetric(theme::SPACE_2 as i8, 0))
-        .show(ui, |ui| {
-            ui.label(RichText::new(board::source_word(s)).color(c).small());
-        });
+    let galley = egui::WidgetText::from(RichText::new(board::source_word(s)).small()).into_galley(
+        ui,
+        Some(egui::TextWrapMode::Extend),
+        f32::INFINITY,
+        egui::TextStyle::Small,
+    );
+    let pad = Vec2::new(theme::SPACE_2, theme::SPACE_1 / 2.0);
+    let (rect, _) = ui.allocate_exact_size(galley.size() + 2.0 * pad, Sense::hover());
+    let p = ui.painter();
+    p.rect_stroke(
+        rect,
+        CornerRadius::same(theme::RADIUS_SM as u8),
+        Stroke::new(1.0_f32, c),
+        egui::StrokeKind::Inside,
+    );
+    p.galley(rect.min + pad, galley, c);
 }
 
 impl eframe::App for App {
