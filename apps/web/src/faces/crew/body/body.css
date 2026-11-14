@@ -3,7 +3,7 @@
   --divider: color-mix(in srgb, var(--bg) 82%, var(--text));
   --shade: color-mix(in srgb, var(--bg) 60%, transparent);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 392px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 380px);
   gap: var(--space-4);
   align-items: start;
 }
@@ -17,7 +17,7 @@
 }
 
 /* hero: legend | model. Under the model on phones. */
-.body-hero { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: var(--space-4); align-items: center; margin-top: var(--space-4); flex: 1; }
+.body-hero { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-4); align-items: center; margin-top: var(--space-4); flex: 1; }
 .body-hero[data-model="off"] { grid-template-columns: minmax(0, 1fr); }
 .body-hero[data-model="off"] .body-rlist { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .body-legend h2 {
