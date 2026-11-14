@@ -61,7 +61,7 @@ pub fn ladder_step(e: Escalation) -> usize {
 }
 
 /// `71.3 bpm`, but `3.0/5` for scores.
-fn format_value(v: f64, unit: &str) -> String {
+pub fn format_value(v: f64, unit: &str) -> String {
     if unit.is_empty() || unit.starts_with('/') {
         format!("{v:.1}{unit}")
     } else {

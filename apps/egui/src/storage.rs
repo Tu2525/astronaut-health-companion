@@ -8,7 +8,7 @@
 //! The log is append-only and owned by the crew: this module never edits, deletes or
 //! overwrites stored events. Unreadable data is left untouched and reported.
 
-use ahc_core::{demo, Event};
+use ahc_core::{demo, Environment, Event};
 
 pub const EVENTS_KEY: &str = "ahc.events.v1";
 pub const SETTINGS_KEY: &str = "ahc.settings.v1";
@@ -26,6 +26,8 @@ pub struct Settings {
     pub crew_id: String,
     pub one_way_delay_s: f64,
     pub met_offset_s: f64,
+    /// `None` when unset or not a known environment.
+    pub environment: Option<Environment>,
 }
 
 impl Settings {
@@ -39,6 +41,7 @@ impl Settings {
                 .as_f64()
                 .unwrap_or(DEMO_ONE_WAY_DELAY_S),
             met_offset_s: v["met_offset_s"].as_f64().unwrap_or(0.0),
+            environment: serde_json::from_value(v["environment"].clone()).ok(),
         }
     }
 }
@@ -137,6 +140,53 @@ pub fn load_settings() -> Settings {
 /// Where the log lives, for the top bar.
 pub fn location() -> String {
     backend::Backend::new().describe()
+}
+
+/// Appends one event: re-reads the stored log, adds the event and writes the whole
+/// array back (`docs/contract.md` section 8), so a write from the other face is never
+/// lost. A missing log is seeded first, as the web app does. An unreadable log is
+/// never written: the event is refused and the reason returned. Returns the new log.
+pub fn append_event(event: Event) -> Result<Vec<Event>, String> {
+    append_event_with(&backend::Backend::new(), event)
+}
+
+fn append_event_with(b: &backend::Backend, event: Event) -> Result<Vec<Event>, String> {
+    let text = b
+        .read(EVENTS_KEY)
+        .map_err(|e| format!("Not logged: the stored log could not be read ({e})."))?;
+    let not_logged = |e: serde_json::Error| format!("Not logged: {e}");
+    // The typed parse checks the log; the stored objects themselves are written back
+    // as they were, so a field this build does not know is never dropped.
+    let (mut events, mut raw) = match parse_log(text.as_deref()) {
+        Stored::Events(events) => {
+            let raw: Vec<serde_json::Value> =
+                serde_json::from_str(text.as_deref().unwrap_or("[]")).map_err(not_logged)?;
+            (events, raw)
+        }
+        Stored::Missing => {
+            let events = demo::events();
+            let raw = serde_json::to_value(&events)
+                .ok()
+                .and_then(|v| v.as_array().cloned())
+                .unwrap_or_default();
+            (events, raw)
+        }
+        Stored::Unreadable(e) => {
+            return Err(format!(
+                "Not logged: the stored log ({EVENTS_KEY}) could not be read and was left untouched ({e})."
+            ))
+        }
+    };
+    // Same guard as the web app: an id already in the log is not added twice.
+    if events.iter().any(|e| e.id == event.id) {
+        return Ok(events);
+    }
+    raw.push(serde_json::to_value(&event).map_err(not_logged)?);
+    let json = serde_json::to_string(&raw).map_err(not_logged)?;
+    b.write(EVENTS_KEY, &json)
+        .map_err(|e| format!("Not logged: {e}"))?;
+    events.push(event);
+    Ok(events)
 }
 
 fn load_events_with(b: &backend::Backend) -> Loaded {
@@ -399,6 +449,75 @@ mod tests {
         let still = std::fs::read_to_string(dir.join("events.json")).unwrap();
         assert_eq!(still, "{ half a log");
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    fn reading(id: &str) -> Event {
+        let mut e = demo::events().pop().unwrap();
+        e.id = id.into();
+        e
+    }
+
+    #[test]
+    fn append_adds_to_the_stored_log_including_other_writers() {
+        let dir = temp_dir("append");
+        let b = backend::Backend::at(dir.clone());
+        // No log yet: seeded, then appended, like the web app.
+        let first = append_event_with(&b, reading("a")).unwrap();
+        assert_eq!(first.len(), demo::events().len() + 1);
+        // Another face appends meanwhile: its event is kept.
+        let mut other = first.clone();
+        other.push(reading("from-web"));
+        b.write(EVENTS_KEY, &serde_json::to_string(&other).unwrap())
+            .unwrap();
+        let after = append_event_with(&b, reading("b")).unwrap();
+        let ids: Vec<_> = after.iter().rev().take(3).map(|e| e.id.as_str()).collect();
+        assert_eq!(ids, ["b", "from-web", "a"]);
+        // The same id twice is stored once.
+        let again = append_event_with(&b, reading("b")).unwrap();
+        assert_eq!(again.len(), after.len());
+        let stored = load_events_with(&b).events.unwrap();
+        assert_eq!(stored.len(), after.len());
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn append_keeps_fields_this_build_does_not_know() {
+        let dir = temp_dir("append-extra");
+        let b = backend::Backend::at(dir.clone());
+        let mut stored: Vec<serde_json::Value> =
+            serde_json::from_str(&serde_json::to_string(&demo::events()).unwrap()).unwrap();
+        stored[0]["added_by_web_later"] = serde_json::json!({ "keep": true });
+        b.write(EVENTS_KEY, &serde_json::to_string(&stored).unwrap())
+            .unwrap();
+        append_event_with(&b, reading("new")).unwrap();
+        let after: Vec<serde_json::Value> =
+            serde_json::from_str(&std::fs::read_to_string(dir.join("events.json")).unwrap())
+                .unwrap();
+        assert_eq!(after.len(), stored.len() + 1);
+        assert_eq!(after[0]["added_by_web_later"]["keep"], true);
+        assert_eq!(after.last().unwrap()["id"], "new");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn append_refuses_an_unreadable_log_and_leaves_it() {
+        let dir = temp_dir("append-corrupt");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("events.json"), "{ half a log").unwrap();
+        let err = append_event_with(&backend::Backend::at(dir.clone()), reading("a"));
+        assert!(err.unwrap_err().starts_with("Not logged"));
+        assert_eq!(
+            std::fs::read_to_string(dir.join("events.json")).unwrap(),
+            "{ half a log"
+        );
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn settings_read_the_environment() {
+        let s = Settings::parse(Some(r#"{"environment": "mars_base"}"#));
+        assert_eq!(s.environment, Some(Environment::MarsBase));
+        assert_eq!(Settings::parse(None).environment, None);
     }
 
     #[test]
