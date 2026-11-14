@@ -75,9 +75,9 @@ Order: 1 by M0. 2 by M1. 3, 4 by M3 (aim for M2). 5 is cut first if late. Publis
 | MOBILE-1 | Expo + TypeScript app, development build on Android, type-only contract imports, `src/theme.ts`, API client; screen shows overall status from `POST /api/assess` on the demo seed | runs on a device or emulator; `typecheck`, `lint`, `test` scripts pass. **Kill switch: T+6** |
 | MOBILE-2 | D2 Camera pulse: fingertip on lens + torch, live signal, bpm estimate, confidence meter, logs `reading` with `confidence: low`, shows the engine's "confirm with a cuff" | workflow W5 |
 | MOBILE-3 | D3 Health Connect: permissions, import heart rate and sleep as `reading` events | values appear in the status list |
-| MOBILE-4 | D1 Home (status + top flag + next task) and D4 Quick check-in | |
-| MOBILE-5 | On-device engine through a native Rust module (`crates/core-ffi`), so the phone works with the API off | stretch |
-| MOBILE-6 | Debug APK built locally; screen recording for the video | |
+| MOBILE-4 | Web shell: the crew website full screen in a WebView, hardware back, external links in the browser, "Website unreachable" + Retry. Replaces separate native Home and check-in screens (decided 2026-11-14) | every website screen works on the emulator; event log survives an app restart |
+| MOBILE-5 | Offline: bundle the website into the APK (in-app server or `WebViewAssetLoader`), so the phone works with no network. The engine already runs on the phone inside the WebView | stretch |
+| MOBILE-6 | Release APK built locally with `EXPO_PUBLIC_WEB_URL` set to the deployed site; screen recording for the video | APK installs and loads the site with no dev server |
 
 Blocked on ENGINE-1 for the real endpoint; until it lands, develop against a saved JSON response.
 If the kill switch fires: keep whatever runs, record it, and the time goes to WEB-9, WEB-11 or WEB-12.
