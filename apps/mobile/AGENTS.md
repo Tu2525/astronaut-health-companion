@@ -5,7 +5,50 @@ Read the root `AGENTS.md` first. Tasks: `docs/plan.md`, section MOBILE. Screens:
 **You own:** `apps/mobile`.
 **Not yours:** `apps/web` (even though the same driver, @AMRYB, runs both: separate sessions, separate worktrees, separate PRs), `crates/`.
 
-## Why mobile exists
+## What the app is now (MOBILE-1, web shell)
+
+The Android app is a thin native shell around the real website in a full-screen `react-native-webview` (`App.tsx`). The phone shows exactly what the website shows, with the same look. The website runs the engine itself in WASM, so **no status, range or escalation logic exists in this app** (law 1). The native layer only adds: black background (no white flash), status-bar padding, hardware Back goes back inside the site, off-origin links open in the system browser, and a "Website unreachable" screen with a Retry button.
+
+Native features that a browser cannot do (camera pulse, Health Connect) will be added next to the WebView as native modules; they are not built yet.
+
+- Site URL: `EXPO_PUBLIC_WEB_URL`, default `http://10.0.2.2:5180` (the host's Vite dev server as seen from the emulator). **Release builds must set `EXPO_PUBLIC_WEB_URL=https://ahc-37u.pages.dev`** (it is inlined into the JS bundle at build time).
+- Debug builds already allow cleartext http (Expo's debug manifest); release does not.
+- The site keeps its event log in `localStorage` (`domStorageEnabled`); it persists across launches. WebView flushes storage to disk a few seconds after a write, so a force-stop within a second of a write can lose it.
+- Edge-to-edge: only the top inset is handled (`StatusBar.currentHeight`). `react-native-safe-area-context` was tried and dropped: its CMake codegen path exceeds Windows' 260-character limit in this repo location, so the Android build fails.
+
+### Known limit
+
+The first load needs the network: the app is **not offline-first yet**. Bundling the site into the APK is not done, because Android WebView cannot fetch the engine's `.wasm` over `file://`; it would need an in-app local server or `WebViewAssetLoader`. Also, a firewalled host makes the load hang about 2 minutes before the error screen appears.
+
+### Run dev
+
+```bash
+# the website must be running on the host (apps/web: npm run dev, port 5180)
+cd apps/mobile && npm install
+export ANDROID_HOME=<sdk>             # emulator started, `adb devices` shows it
+npx expo run:android                  # native rebuild; needed after adding native modules
+npx expo start --clear --dev-client   # Metro; use --clear, the watcher can serve stale bundles
+adb reverse tcp:8081 tcp:8081
+```
+
+If port 8081 is taken, `expo run:android` moves to 8082: open the app with `adb reverse tcp:8082 tcp:8082` and the deep link `exp+zerogpulse://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8082`. In the dev build the website's 3D body can fail to load (`Failed to fetch dynamically imported module .../BodyCanvas.tsx`, Vite's unbundled ~11 MB three/drei deps); the release APK, which loads the built site, renders it.
+
+Before trusting a screenshot, check the bundle has your code: `curl -s "localhost:8081/index.bundle?platform=android&dev=true" | grep -c <new string>`.
+
+### Build the release APK (points at the deployed site)
+
+```bash
+cd apps/mobile && EXPO_PUBLIC_WEB_URL=https://ahc-37u.pages.dev npx expo prebuild --platform android   # if android/ is missing
+cd android && EXPO_PUBLIC_WEB_URL=https://ahc-37u.pages.dev ./gradlew assembleRelease
+# -> android/app/build/outputs/apk/release/app-release.apk (signed with the debug key; do not commit; android/ is gitignored)
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+## Original plan (kept for the later native tasks)
+
+Where this conflicts with the section above (screens, API calls from the app, `EXPO_PUBLIC_API_URL`), the web shell wins; the camera pulse and Health Connect notes still apply.
+
+### Why mobile exists
 
 Judges will not install an APK. The phone earns its place only by doing what a browser cannot:
 
