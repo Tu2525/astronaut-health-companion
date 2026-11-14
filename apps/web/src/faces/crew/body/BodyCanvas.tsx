@@ -67,13 +67,13 @@ function Body(props: BodyCanvasProps) {
   const reduce = useMemo(() => matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
   const palette = useMemo(() => {
-    const neutral = cssColor("color-mix(in srgb, var(--text-muted) 88%, var(--text))");
+    const neutral = cssColor("var(--organ-neutral)");
     const status = Object.fromEntries((["nominal", "watch", "caution", "urgent", "unknown"] as const)
       .map((s) => [s, cssColor(`var(--status-${s})`)])) as Record<Status, THREE.Color>;
     return {
       status, neutral,
-      calmShell: neutral.clone().lerp(status.nominal, 0.06),
-      calmOrgan: neutral.clone().lerp(status.nominal, 0.22),
+      calmShell: neutral.clone(),
+      calmOrgan: neutral.clone(),
     };
   }, []);
 

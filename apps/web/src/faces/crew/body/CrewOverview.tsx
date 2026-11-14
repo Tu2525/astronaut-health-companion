@@ -4,7 +4,7 @@ import type { Hazard } from "../../../contract/Hazard";
 import type { Region } from "../../../contract/Region";
 import type { Status } from "../../../contract/Status";
 import { Ladder } from "../../../ui/Ladder";
-import { RegionIcon } from "../../../ui/icons";
+import { HazardIcon, RegionIcon } from "../../../ui/icons";
 import { SourceChip } from "../../../ui/SourceChip";
 import { StatusChip } from "../../../ui/StatusChip";
 import "./body.css";
@@ -110,7 +110,7 @@ export function CrewOverview({ model }: { model: Model }) {
         <div className="body-lens" role="group" aria-label="Hazard lens">
           {HAZARDS.map(({ id, label }) => (
             <button key={id} aria-pressed={lens === id} onClick={() => setLens(lens === id ? null : id)}
-              style={{ "--h": `var(--hazard-${id.replace("_", "-")})` } as CSSProperties}>{label}</button>
+              style={{ "--h": `var(--hazard-${id.replace("_", "-")})` } as CSSProperties}><HazardIcon hazard={id} />{label}</button>
           ))}
         </div>
       </section>
