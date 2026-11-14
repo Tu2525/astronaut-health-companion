@@ -1,0 +1,13 @@
+.comms-grid { display: grid; gap: var(--space-4); }
+@media (min-width: 800px) { .comms-grid { grid-template-columns: 1fr 1fr; } .comms-grid .inbox { grid-column: 1 / -1; } }
+.comms-card h2 { margin-top: 0; }
+.comms-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.comms-list li { padding-top: var(--space-3); border-top: 1px solid var(--border); }
+.comms-state { display: inline-flex; gap: var(--space-2); align-items: center; font-weight: 600; margin: 0; }
+.comms-state[data-state="up"], .comms-state[data-state="arrived"] { color: var(--status-nominal); }
+.comms-state[data-state="down"], .comms-state[data-state="queued"] { color: var(--status-caution); }
+.comms-state[data-state="transit"], .comms-state[data-state="checking"] { color: var(--text-muted); }
+.skip { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-top: var(--space-3); }
+.sbar { display: grid; gap: var(--space-3); margin: 0 0 var(--space-4); }
+.sbar dt { color: var(--text-muted); font-size: 0.85em; }
+.sbar dd { margin: 0; line-height: 1.45; }

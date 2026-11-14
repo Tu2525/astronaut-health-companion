@@ -12,20 +12,14 @@ export function TopBar({ model }: { model: ReturnType<CrewStore["getSnapshot"]> 
   const { assessment, earthMs, nowMet, settings } = model;
   return (
     <header className="top-bar">
-      <div className="top-inner">
-        <a className="brand" href="#/crew/body">
-          <span className="brand-mark" aria-hidden="true">✦</span>
-          <span>Astronaut Health Companion</span>
-        </a>
-        <div className="top-status" role="status">Overall <StatusChip status={assessment.overall} /></div>
-      </div>
-      <dl className="mission-data">
-        <div><dt>Mission day</dt><dd>{missionDay(nowMet)}</dd></div>
-        <div><dt>MET</dt><dd>{formatMet(nowMet)}</dd></div>
-        <div><dt>Earth time</dt><dd>{formatEarth(earthMs)}</dd></div>
-        <div><dt>Environment</dt><dd>{environments[settings.environment]}</dd></div>
-        <div><dt>One-way delay</dt><dd>{settings.one_way_delay_s} s <small>demo</small></dd></div>
-      </dl>
+      <a className="brand" href="#/crew/body">ZeroG Pulse</a>
+      <div className="tb-item"><small>Mission day</small><b>{missionDay(nowMet)}<span className="tb-hide"> · MET {formatMet(nowMet)}</span></b></div>
+      <div className="tb-item tb-hide"><small>Earth</small><b>{formatEarth(earthMs)}</b></div>
+      <div className="tb-item tb-hide"><small>Environment</small><b>{environments[settings.environment]}</b></div>
+      <div className="tb-item tb-hide"><small>One-way delay</small><b>{settings.one_way_delay_s} s <span className="tb-demo">demo</span></b></div>
+      <div className="tb-spacer" />
+      <div className="tb-item top-status" role="status"><small>Overall</small><StatusChip status={assessment.overall} /></div>
+      <a className="safe-link" href="./safe/" aria-label="Open safe mode, the offline fallback view">Safe mode</a>
     </header>
   );
 }
