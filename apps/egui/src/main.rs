@@ -395,14 +395,17 @@ fn flag_card(ui: &mut egui::Ui, f: &FlagCard) {
 /// (the first WASM frame is laid out at a tiny canvas size) kept every row tall for good.
 fn source_chip(ui: &mut egui::Ui, s: ahc_core::SourceStatus) {
     let c = theme::source_colour(s);
-    let galley = egui::WidgetText::from(RichText::new(board::source_word(s)).small()).into_galley(
+    let word = board::source_word(s);
+    let galley = egui::WidgetText::from(RichText::new(word).small()).into_galley(
         ui,
         Some(egui::TextWrapMode::Extend),
         f32::INFINITY,
         egui::TextStyle::Small,
     );
     let pad = Vec2::new(theme::SPACE_2, theme::SPACE_1 / 2.0);
-    let (rect, _) = ui.allocate_exact_size(galley.size() + 2.0 * pad, Sense::hover());
+    let (rect, response) = ui.allocate_exact_size(galley.size() + 2.0 * pad, Sense::hover());
+    // Painted text is invisible to screen readers; name it like a label would be.
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, word));
     let p = ui.painter();
     p.rect_stroke(
         rect,
