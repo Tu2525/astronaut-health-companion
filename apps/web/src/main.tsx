@@ -22,7 +22,7 @@ function App({ store }: { store: CrewStore }) {
     <>
       <TopBar model={model} />
       <main className="content">
-        {route === CREW_ROUTE ? <CrewOverview assessment={model.assessment} /> : (
+        {route === CREW_ROUTE ? <CrewOverview model={model} /> : (
           <div className="page-heading">
             <h1>Page unavailable</h1>
             <a href={CREW_ROUTE}>Return to crew health</a>
