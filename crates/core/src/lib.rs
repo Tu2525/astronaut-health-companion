@@ -13,9 +13,18 @@ pub fn registry() -> Vec<Indicator> {
     serde_json::from_str(include_str!("../registry.json")).expect("registry.json is invalid")
 }
 
+/// Reject a caller-supplied registry the engine cannot judge. Every face calls this before `assess`.
+pub fn validate(input: &AssessInput) -> Result<(), String> {
+    match input.registry.iter().flatten().any(|i| i.ranges.is_empty()) {
+        true => Err("Each registry indicator must define at least one range.".into()),
+        false => Ok(()),
+    }
+}
+
 /// JSON boundary used by WASM, FFI and the API: `AssessInput` in, `Assessment` out.
 pub fn assess_json(input: &str) -> Result<String, String> {
     let input: AssessInput = serde_json::from_str(input).map_err(|e| e.to_string())?;
+    validate(&input)?;
     serde_json::to_string(&assess(&input)).map_err(|e| e.to_string())
 }
 

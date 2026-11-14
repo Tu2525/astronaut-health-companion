@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/core", "crates/core-wasm", "apps/egui"]
+members = ["crates/core", "crates/core-wasm", "crates/api", "apps/egui"]
 # Owners add their crate here in their first PR: crates/api, apps/egui, apps/desktop/src-tauri
 
 [workspace.package]

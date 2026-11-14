@@ -22,11 +22,7 @@ pub fn registry() -> String {
 /// Seeded demo state: { crew_id, now_met_s, launch_earth_ms, events, kit }.
 #[wasm_bindgen]
 pub fn demo() -> String {
-    use ahc_core::demo::*;
-    json(&serde_json::json!({
-        "crew_id": CREW_ID, "now_met_s": NOW_MET_S, "launch_earth_ms": LAUNCH_EARTH_MS,
-        "events": events(), "kit": kit(),
-    }))
+    json(&ahc_core::demo::seed())
 }
 
 /// Event[] JSON + crew id -> Score JSON. Goes through the value-stripping projection.
