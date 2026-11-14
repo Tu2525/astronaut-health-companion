@@ -44,7 +44,6 @@ export function SendReport({ model, store, indicatorId }: { model: Model; store:
     <>
       <div className="page-heading">
         <h1>Report to ground</h1>
-        <a href="#/crew/comms">Back to comms</a>
       </div>
       <Card className="comms-card">
         <h2>SBAR draft{indicator ? <> for {indicator.name}</> : null}</h2>

@@ -42,3 +42,5 @@
   .measure-row { grid-template-columns: 1fr auto; }
   .measure-last { grid-column: 1; }
 }
+.measure-display input[data-active] { border-color: var(--text); } /* the field the keypad types into */
+@media (max-width: 720px) { .measure-grid, .measure-meta { grid-template-columns: minmax(0, 1fr); } }

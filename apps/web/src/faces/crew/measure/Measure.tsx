@@ -51,12 +51,20 @@ function Picker({ model }: { model: Model }) {
   );
 }
 
+// Systolic and diastolic come off the cuff together; the contract gives them one prompt.
+const PAIRED: Record<string, string> = { bp_systolic: "bp_diastolic", bp_diastolic: "bp_systolic" };
+
 const KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "-", "0", "."];
 
 function Guide({ model, store, indicator }: { model: Model; store: CrewStore; indicator: Model["indicators"][number] }) {
   const units = [{ unit: indicator.unit, factor: 1, offset: 0 }, ...indicator.alt_units];
   const [unitIdx, setUnitIdx] = useState(0);
   const [text, setText] = useState("");
+  const partner = model.indicators.find(({ id }) => id === PAIRED[indicator.id]);
+  const [text2, setText2] = useState("");
+  const [active, setActive] = useState<1 | 2>(1);
+  const typed = active === 1 ? text : text2;
+  const setTyped = active === 1 ? setText : setText2;
   const [device, setDevice] = useState("manual entry");
   const [confidence, setConfidence] = useState<Confidence>("high");
   const [error, setError] = useState("");
@@ -67,25 +75,29 @@ function Guide({ model, store, indicator }: { model: Model; store: CrewStore; in
     e.preventDefault();
     const shown = text.trim() === "" ? NaN : Number(text);
     const value = (shown - u.offset) / u.factor;
-    if (!Number.isFinite(value)) { setError("Enter a number."); return; }
-    store.append({
+    const value2 = text2.trim() === "" ? NaN : Number(text2);
+    if (!Number.isFinite(value) || (partner && !Number.isFinite(value2))) {
+      setError(partner ? "Enter both numbers." : "Enter a number."); return;
+    }
+    const log = (indicator_id: string, v: number) => store.append({
       id: crypto.randomUUID(), crew_id: model.settings.crew_id, met_s: model.nowMet,
       earth_ms: model.earthMs, environment: model.settings.environment, author: model.settings.crew_id,
-      kind: { type: "reading", indicator_id: indicator.id, value, device: device.trim() || "manual entry", confidence },
+      kind: { type: "reading", indicator_id, value: v, device: device.trim() || "manual entry", confidence },
     });
+    log(indicator.id, value);
+    if (partner) log(partner.id, value2);
     setError("");
     setDone(true);
   }
 
   if (done) {
-    return <Result model={model} indicatorId={indicator.id} name={indicator.name} onAgain={() => { setText(""); setDone(false); }} />;
+    return <Result model={model} indicatorId={indicator.id} name={indicator.name} onAgain={() => { setText(""); setText2(""); setActive(1); setDone(false); }} />;
   }
 
   return (
     <>
       <div className="page-heading">
         <h1>{indicator.name}</h1>
-        <a href="#/crew/measure">All measurements</a>
       </div>
       <div className="measure-grid">
         <Card>
@@ -97,7 +109,7 @@ function Guide({ model, store, indicator }: { model: Model; store: CrewStore; in
         </Card>
         <Card>
           <form onSubmit={submit} noValidate>
-            <h2><label htmlFor="measure-value">Value</label></h2>
+            <h2><label htmlFor="measure-value">{partner ? indicator.name : "Value"}</label></h2>
             {units.length > 1 && (
               <div className="unit-toggle" role="group" aria-label="Unit">
                 {units.map((x, i) => (
@@ -109,16 +121,28 @@ function Guide({ model, store, indicator }: { model: Model; store: CrewStore; in
             <div className="measure-display">
               <input id="measure-value" inputMode="decimal" autoComplete="off" value={text}
                 aria-describedby={error ? "measure-error" : undefined} aria-invalid={error ? true : undefined}
+                onFocus={() => setActive(1)} data-active={partner && active === 1 ? "" : undefined}
                 onChange={(e) => { setText(e.target.value); setError(""); }} />
               <span>{u.unit}</span>
             </div>
+            {partner && (
+              <>
+                <h2><label htmlFor="measure-value-2">{partner.name}</label></h2>
+                <div className="measure-display">
+                  <input id="measure-value-2" inputMode="decimal" autoComplete="off" value={text2}
+                    onFocus={() => setActive(2)} data-active={active === 2 ? "" : undefined}
+                    onChange={(e) => { setText2(e.target.value); setError(""); }} />
+                  <span>{partner.unit}</span>
+                </div>
+              </>
+            )}
             {error && <p id="measure-error" className="measure-error" role="alert">{error}</p>}
             <div className="keypad">
               {KEYS.map((k) => (
-                <button key={k} type="button" onClick={() => { setText(text + k); setError(""); }}>{k}</button>
+                <button key={k} type="button" onClick={() => { setTyped(typed + k); setError(""); }}>{k}</button>
               ))}
-              <button type="button" className="keypad-wide" onClick={() => setText(text.slice(0, -1))}>Delete</button>
-              <button type="button" className="keypad-wide" onClick={() => setText("")}>Clear</button>
+              <button type="button" className="keypad-wide" onClick={() => setTyped(typed.slice(0, -1))}>Delete</button>
+              <button type="button" className="keypad-wide" onClick={() => setTyped("")}>Clear</button>
             </div>
             <div className="measure-meta">
               <label>Device
@@ -147,7 +171,6 @@ function Result({ model, indicatorId, name, onAgain }: { model: Model; indicator
     <>
       <div className="page-heading">
         <h1>{name}</h1>
-        <a href="#/crew/measure">All measurements</a>
       </div>
       <Card>
         <h2>Result</h2>

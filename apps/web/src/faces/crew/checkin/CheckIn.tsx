@@ -5,10 +5,11 @@ import { Card } from "../../../ui/Card";
 import "./checkin.css";
 
 const FIELDS = [
-  ["mood", "Mood"],
-  ["stress", "Stress"],
-  ["energy", "Energy"],
-  ["sleep_quality", "Sleep quality"],
+  // Contract: every scale runs 1 (bad) to 5 (good), so for stress 5 means calm.
+  ["mood", "Mood", "1 low", "5 good"],
+  ["stress", "Stress", "1 very stressed", "5 calm"],
+  ["energy", "Energy", "1 drained", "5 full of energy"],
+  ["sleep_quality", "Sleep quality", "1 poor", "5 good"],
 ] as const;
 type Field = (typeof FIELDS)[number][0];
 
@@ -44,9 +45,9 @@ export function CheckIn({ store }: { store: CrewStore }) {
 
   return (
     <form onSubmit={submit}>
-      <div className="page-heading"><h1>Check-in</h1><a href="#/crew/today">Back to Today</a></div>
+      <div className="page-heading"><h1>Check-in</h1></div>
       <Card className="checkin-card">
-        {FIELDS.map(([key, label]) => (
+        {FIELDS.map(([key, label, low, high]) => (
           <fieldset key={key} className="scale" role="radiogroup">
             <legend>{label}</legend>
             <div className="scale-options">
@@ -58,7 +59,7 @@ export function CheckIn({ store }: { store: CrewStore }) {
                 </label>
               ))}
             </div>
-            <div className="scale-ends"><span>1 bad</span><span>5 good</span></div>
+            <div className="scale-ends"><span>{low}</span><span>{high}</span></div>
           </fieldset>
         ))}
         <label className="note">

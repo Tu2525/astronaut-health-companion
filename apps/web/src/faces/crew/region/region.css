@@ -1,7 +1,6 @@
-.page-heading h1 { text-transform: capitalize; }
 .region-list { display: grid; gap: var(--space-4); }
 .region-row-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
-.region-row-head h2 { margin: 0; font-size: 1.1rem; }
+.region-row-head h2 { margin: 0; font: 600 1.05rem var(--font-ui); letter-spacing: normal; text-transform: none; color: var(--text); }
 .region-value { font-family: var(--font-mono); }
 .region-facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: var(--space-3) 0; }
 .region-facts dt { color: var(--text-muted); font-size: .8rem; }

@@ -16,7 +16,7 @@ function Row({ ind, st, flagged }: { ind: Indicator; st: IndicatorStatus | undef
   return (
     <Card className="region-row">
       <div className="region-row-head">
-        <h2><a href={`#/crew/measure/${ind.id}`}>{ind.name}</a></h2>
+        <h2>{ind.name}</h2>
         <StatusChip status={st?.status ?? "unknown"} />
       </div>
       <p className="region-value">
@@ -68,7 +68,6 @@ export function RegionDetail({ region, assessment, indicators }: { region: strin
         <h1>{region}</h1>
         <StatusChip status={rs?.status ?? "unknown"} />
       </div>
-      <p><a href="#/crew/body">Back to crew health</a></p>
       {list.length === 0 ? <p className="next-step">No indicators are tracked for this region.</p> : (
         <div className="region-list">
           {list.map((ind) => <Row key={ind.id} ind={ind} st={assessment.indicators.find((s) => s.indicator_id === ind.id)} flagged={assessment.flags.some((f) => f.indicator_id === ind.id)} />)}

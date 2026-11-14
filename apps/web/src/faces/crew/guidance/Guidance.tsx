@@ -31,7 +31,6 @@ export function Guidance({ model, store, indicatorId }: { model: Model; store: C
     <div className="guidance">
       <div className="page-heading">
         <h1>Guidance: {name}</h1>
-        <a href="#/crew/body">Back to crew health</a>
       </div>
       {!flag ? (
         <Card>
