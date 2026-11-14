@@ -15,9 +15,10 @@ export function TopBar({ model }: { model: ReturnType<CrewStore["getSnapshot"]> 
       <div className="top-inner">
         <a className="brand" href="#/crew/body">
           <span className="brand-mark" aria-hidden="true">✦</span>
-          <span>Astronaut Health Companion</span>
+          <span>ZeroG Pulse</span>
         </a>
         <div className="top-status" role="status">Overall <StatusChip status={assessment.overall} /></div>
+        <a className="safe-link" href="./safe/" aria-label="Open safe mode, the offline fallback view">Safe mode</a>
       </div>
       <dl className="mission-data">
         <div><dt>Mission day</dt><dd>{missionDay(nowMet)}</dd></div>

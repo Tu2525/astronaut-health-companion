@@ -70,6 +70,30 @@ button {
 
 .content { padding-block: clamp(28px, 6vw, 76px); }
 .boot-error { display: grid; justify-items: start; gap: var(--space-4); }
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.safe-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.boundary-fallback { display: grid; place-items: center; min-height: 100vh; }
+.boundary-card { display: grid; gap: var(--space-4); justify-items: start; max-width: 560px; }
+.boundary-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .page-heading {
   display: flex;
   justify-content: space-between;
