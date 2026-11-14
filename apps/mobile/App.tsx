@@ -1,75 +1,87 @@
-import type { Assessment } from "@contract/Assessment";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text } from "react-native";
-import { assess, getDemo } from "./src/api";
-import { Home } from "./src/Home";
-import { colors, radius, space, touchTarget } from "./src/theme";
+import {
+  type ComponentType,
+  type Ref,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  BackHandler,
+  Linking,
+  StatusBar as RNStatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
+import { WebView as AnyWebView } from "react-native-webview";
+import type { AndroidWebViewProps } from "react-native-webview/lib/WebViewTypes";
+import { Unreachable } from "./src/Unreachable";
+import { colors } from "./src/theme";
+
+// ponytail: the package types the cross-platform export as `never` under TS 6; Android only here.
+type Web = { goBack(): void; reload(): void };
+const WebView = AnyWebView as unknown as ComponentType<
+  AndroidWebViewProps & { ref?: Ref<Web> }
+>;
+
+// Dev builds reach the host's Vite server from the emulator. Release builds must set
+// EXPO_PUBLIC_WEB_URL=https://ahc-37u.pages.dev at build time.
+const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? "http://10.0.2.2:5180";
+const ORIGIN = new URL(WEB_URL).origin;
 
 export default function App() {
-  const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const web = useRef<Web>(null);
+  const canGoBack = useRef(false);
   const [failed, setFailed] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const d = await getDemo();
-      setAssessment(
-        await assess({
-          crew_id: d.crew_id,
-          events: d.events,
-          now_met_s: d.now_met_s,
-          kit: d.kit,
-          registry: null,
-        }),
-      );
-    } catch {
-      // Never guess a status locally: show that the engine is out of reach.
-      setAssessment(null);
-      setFailed(true);
-    }
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!canGoBack.current) return false; // default: leave the app
+      web.current?.goBack();
+      return true;
+    });
+    return () => sub.remove();
   }, []);
 
-  useEffect(() => {
-    // Fetches once on mount; state is set only after the awaited request.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
-  }, [load]);
-
   return (
-    <SafeAreaView style={styles.root}>
+    <View style={styles.root}>
       <StatusBar style="light" />
-      <Text style={styles.brand}>ZeroG Pulse</Text>
-      {assessment ? <Home assessment={assessment} /> : null}
+      <WebView
+        ref={web}
+        source={{ uri: WEB_URL }}
+        style={styles.black}
+        containerStyle={styles.black}
+        javaScriptEnabled
+        domStorageEnabled
+        onNavigationStateChange={(s) => {
+          canGoBack.current = s.canGoBack;
+        }}
+        onShouldStartLoadWithRequest={(r) => {
+          if (r.url.startsWith(ORIGIN) || !/^https?:/.test(r.url)) return true;
+          void Linking.openURL(r.url);
+          return false;
+        }}
+        onError={() => setFailed(true)}
+        onHttpError={() => setFailed(true)}
+      />
       {failed ? (
-        <>
-          <Text style={styles.error}>Engine unreachable</Text>
-          <Pressable style={styles.retry} onPress={() => {
-              setFailed(false);
-              void load();
-            }}>
-            <Text style={styles.retryText}>Retry</Text>
-          </Pressable>
-        </>
+        <Unreachable
+          url={WEB_URL}
+          onRetry={() => {
+            setFailed(false);
+            web.current?.reload();
+          }}
+        />
       ) : null}
-      {!assessment && !failed ? <Text style={styles.muted}>Loading…</Text> : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg, padding: space[6], paddingTop: space[8] * 2 },
-  brand: { color: colors.text, fontSize: 24, fontWeight: "700", marginBottom: space[6] },
-  muted: { color: colors.textMuted },
-  error: { color: colors.text, fontSize: 18, fontWeight: "600" },
-  retry: {
-    marginTop: space[4],
-    minHeight: touchTarget,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.surfaceRaised,
-    borderColor: colors.accent,
-    borderWidth: 1,
-    borderRadius: radius.md,
+  black: { flex: 1, backgroundColor: colors.bg },
+  root: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    paddingTop: RNStatusBar.currentHeight ?? 0,
   },
-  retryText: { color: colors.accent, fontSize: 16, fontWeight: "600" },
 });
