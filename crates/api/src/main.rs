@@ -43,7 +43,10 @@ async fn assess(
     Json(input): Json<AssessInput>,
 ) -> Result<Json<Assessment>, (StatusCode, Json<Value>)> {
     ahc_core::validate(&input).map_err(|error| {
-        (StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": error })))
+        (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            Json(json!({ "error": error })),
+        )
     })?;
 
     Ok(Json(ahc_core::assess(&input)))
