@@ -3,9 +3,11 @@
 pub mod demo;
 pub mod engine;
 pub mod gamify;
+mod report;
 pub mod types;
 
 pub use engine::assess;
+pub use report::draft_sbar;
 pub use types::*;
 
 /// Built-in indicator registry (rules as data). Edit registry.json, not code.
@@ -138,6 +140,43 @@ mod tests {
             .actions
             .iter()
             .any(|x| x.action.kit_item.is_some() && !x.available));
+    }
+
+    #[test]
+    fn sbar_for_persistent_high_blood_pressure() {
+        let mut input = demo_input();
+        input.events.extend([
+            read("bp_systolic", 138.0, Confidence::High, 60.0),
+            read("bp_systolic", 139.0, Confidence::High, 7260.0),
+        ]);
+        input.now_met_s += 7260.0;
+
+        let assessment = assess(&input);
+        let sbar = draft_sbar(&assessment, &registry());
+        assert_eq!(assessment.flags[0].indicator_id, "bp_systolic");
+        assert_eq!(sbar.situation, assessment.flags[0].summary);
+        assert!(sbar.background.contains("Latest reading: 139 mmHg."));
+        assert!(sbar.background.contains("Preflight baseline: 116 mmHg."));
+        assert_eq!(
+            sbar.assessment,
+            "Overall status: Caution. Escalation: Consult ground."
+        );
+        assert_eq!(sbar.recommendation, assessment.flags[0].next_step);
+    }
+
+    #[test]
+    fn sbar_without_flags_preserves_unknown_status() {
+        let mut input = demo_input();
+        input.events.clear();
+        let sbar = draft_sbar(&assess(&input), &registry());
+
+        assert_eq!(sbar.situation, "No active indicator flags.");
+        assert_eq!(
+            sbar.assessment,
+            "Overall status: Unknown. Escalation: Monitor."
+        );
+        assert!(!sbar.background.is_empty());
+        assert!(!sbar.recommendation.is_empty());
     }
 
     #[test]
