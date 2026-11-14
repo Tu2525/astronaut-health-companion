@@ -11,7 +11,7 @@
 .measure-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
 .measure-steps { margin: var(--space-4) 0 0; padding-inline-start: 1.4rem; display: grid; gap: var(--space-3); line-height: 1.45; }
 .unit-toggle { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
-.unit-toggle button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--surface-raised); }
+.unit-toggle button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--surface-sunken); }
 .measure-display { display: flex; align-items: baseline; gap: var(--space-3); margin-block: var(--space-4); }
 .measure-display input {
   flex: 1; min-width: 0; min-height: 64px; padding-inline: var(--space-4);

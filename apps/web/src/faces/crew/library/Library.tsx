@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { HazardIcon } from "../../../ui/icons";
 import type { Hazard } from "../../../contract/Hazard";
 import type { Indicator } from "../../../contract/Indicator";
 import type { Region } from "../../../contract/Region";
@@ -65,7 +66,7 @@ export function Library({ model }: { model: ReturnType<CrewStore["getSnapshot"]>
                   <span className="unit-chip">{indicator.unit}</span>
                   <span className="unit-chip">{regionLabels[indicator.region]}</span>
                   {indicator.hazards.map((hazard) => (
-                    <span key={hazard} className="hazard-chip">{hazardLabels[hazard]}</span>
+                    <span key={hazard} className="hazard-chip"><HazardIcon hazard={hazard} />{hazardLabels[hazard]}</span>
                   ))}
                 </div>
                 <details>

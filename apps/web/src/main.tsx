@@ -1,5 +1,11 @@
 import { useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource/syne/600.css";
+import "@fontsource/syne/700.css";
+import "@fontsource/syne/800.css";
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
 import "../../../design/tokens.css";
 import "./styles.css";
 import { initEngine } from "./engine";
@@ -53,16 +59,31 @@ function Page({ route, model, store }: { route: string; model: Model; store: Cre
   );
 }
 
+const backs: Record<string, [string, string]> = {
+  guidance: ["#/crew/body", "Home"], region: ["#/crew/body", "Home"], checkin: ["#/crew/today", "Today"],
+};
+
+function Back({ route }: { route: string }) {
+  const [path] = route.split("?");
+  const [, , screen, param] = path.split("/");
+  const to = screen === "comms" && param === "send" ? (["#/crew/comms", "Ground"] as [string, string])
+    : screen === "measure" && param ? (["#/crew/measure", "Measure"] as [string, string]) : backs[screen];
+  return to ? <a className="back-link" href={to[0]}>← Back to {to[1]}</a> : null;
+}
+
 function App({ store }: { store: CrewStore }) {
   const model = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const route = useSyncExternalStore(subscribeRoute, () => location.hash || CREW_ROUTE);
   return (
     <>
       <TopBar model={model} />
-      <NavBar route={route} />
-      <main className="content">
-        <Page route={route} model={model} store={store} />
-      </main>
+      <div className="shell">
+        <NavBar route={route} />
+        <main className="content">
+          <Back route={route} />
+          <Page route={route} model={model} store={store} />
+        </main>
+      </div>
     </>
   );
 }

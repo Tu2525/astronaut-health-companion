@@ -6,7 +6,7 @@
   padding-inline: var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface-raised);
+  background: var(--surface-sunken);
   color: var(--text);
   font: inherit;
 }
@@ -25,7 +25,7 @@
   font-size: .8rem;
 }
 .unit-chip { font-family: var(--font-mono); color: var(--text-muted); }
-.hazard-chip { color: var(--text); background: var(--surface-raised); }
+.hazard-chip { gap: 6px; color: var(--text); background: transparent; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; font-size: .7rem; }
 .library-card details summary {
   display: inline-flex;
   align-items: center;

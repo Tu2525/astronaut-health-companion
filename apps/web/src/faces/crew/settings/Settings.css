@@ -10,7 +10,7 @@
   padding-inline: var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface-raised);
+  background: var(--surface-sunken);
   color: var(--text);
   font: inherit;
 }

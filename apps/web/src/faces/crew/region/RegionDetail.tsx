@@ -3,6 +3,7 @@ import type { Assessment } from "../../../contract/Assessment";
 import type { Indicator } from "../../../contract/Indicator";
 import type { IndicatorStatus } from "../../../contract/IndicatorStatus";
 import { Card } from "../../../ui/Card";
+import { HazardIcon } from "../../../ui/icons";
 import { SourceChip } from "../../../ui/SourceChip";
 import { StatusChip } from "../../../ui/StatusChip";
 import "./region.css";
@@ -31,7 +32,7 @@ function Row({ ind, st, flagged }: { ind: Indicator; st: IndicatorStatus | undef
         </dl>
       )}
       <ul className="hazard-list" aria-label="Hazards">
-        {ind.hazards.map((h) => <li key={h} data-hazard={h}>{label(h)}</li>)}
+        {ind.hazards.map((h) => <li key={h} data-hazard={h}><HazardIcon hazard={h} />{label(h)}</li>)}
       </ul>
       <p className="region-links">
         <a href={`#/crew/measure/${ind.id}`}>Measure</a>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Hazard } from "../contract/Hazard";
 import type { Region } from "../contract/Region";
 import type { Status } from "../contract/Status";
 
@@ -7,7 +8,7 @@ import type { Status } from "../contract/Status";
 function Svg({ children, size = "20px", stroke = 1.7 }: { children: ReactNode; size?: string; stroke?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={stroke}
-      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ flex: "none" }}>
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ flex: "none", display: "block" }}>
       {children}
     </svg>
   );
@@ -36,3 +37,13 @@ const statusPaths: Record<Status, ReactNode> = {
 
 export const RegionIcon = ({ region }: { region: Region }) => <Svg>{regionPaths[region]}</Svg>;
 export const StatusGlyph = ({ status }: { status: Status }) => <Svg size="1.15em" stroke={2.2}>{statusPaths[status]}</Svg>;
+
+const hazardPaths: Record<Hazard, ReactNode> = {
+  radiation: <><circle cx="12" cy="12" r="1.1" /><path d="M7.75 4.64A8.5 8.5 0 0 1 16.25 4.64L13.80 8.88A3.6 3.6 0 0 0 10.20 8.88Z" /><path d="M20.50 12.00A8.5 8.5 0 0 1 16.25 19.36L13.80 15.12A3.6 3.6 0 0 0 15.60 12.00Z" /><path d="M7.75 19.36A8.5 8.5 0 0 1 3.50 12.00L8.40 12.00A3.6 3.6 0 0 0 10.20 15.12Z" /></>,
+  isolation: <><rect x="7" y="2.5" width="10" height="19" rx="5" /><circle cx="12" cy="9.5" r="1.8" /><path d="M9.5 17v-2.2a2.5 2.5 0 0 1 5 0V17" /></>,
+  distance: <><circle cx="6" cy="17" r="3.5" /><path d="M9 12.5C11 8 14.5 6 18 6" strokeDasharray="2 3" /><circle cx="20" cy="5.5" r="1.2" /></>,
+  gravity: <><path d="M12 3v11m0 0-4-4m4 4 4-4" /><path d="M3 21c2-3 5-4.5 9-4.5s7 1.5 9 4.5" /></>,
+  closed_environment: <><path d="M3 20h18M4.5 20a7.5 7.5 0 0 1 15 0" /><path d="M9 14.5a3.2 3.2 0 0 1 5.6-1.2M15 14.5a3.2 3.2 0 0 1-5.6 1.2" /><path d="M14.6 11.5v2h-2M9.4 17.5v-2h2" /></>,
+};
+
+export const HazardIcon = ({ hazard }: { hazard: Hazard }) => <Svg size="16px">{hazardPaths[hazard]}</Svg>;
