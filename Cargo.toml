@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
 members = ["crates/core", "crates/core-wasm", "crates/api", "apps/egui"]
+# desktop shell needs apps/web/dist at compile time, so CI cannot lint it with the workspace
+exclude = ["apps/desktop/src-tauri"]
 # Owners add their crate here in their first PR: crates/api, apps/egui, apps/desktop/src-tauri
 
 [workspace.package]
