@@ -1,6 +1,7 @@
 /*
  * THE COLOUR CODE. Single source for every face. See design/README.md.
- * PROVISIONAL values (dark cockpit: calm by default, only what needs attention is bright).
+ * Values follow design/references/crew-home-proposal-v4-3d.html (monochrome cockpit:
+ * near-black, squared, only status hues carry colour; calm by default).
  * Change values here, never names. Mirrors: apps/egui (theme.rs), apps/mobile (src/theme.ts).
  */
 :root {
@@ -12,19 +13,27 @@
   --status-unknown: #8a93a6; /* ○ Unknown */
 
   /* Surfaces */
-  --bg: #0b0f17;
-  --surface: #121826;
-  --surface-raised: #1a2233;
-  --border: #263046;
+  --bg: #000000;
+  --surface: #050607;
+  --surface-raised: #0d0f12;
+  --surface-sunken: #0a0b0d;   /* flag rows, ladder steps, action tiles */
+  --surface-hover: #15181c;    /* hover fill, subtle row dividers */
+  --stage-glow: #14171b;       /* top glow behind the body stage */
+  --border: #23262b;
+  --border-strong: #454a52;
 
   /* Text */
-  --text: #e6eaf2;
-  --text-muted: #8a93a6;
-  --text-on-status: #0b0f17;
+  --text: #f2f3f5;
+  --text-muted: #8b9097;
+  --text-on-status: #000000;
 
   /* Brand / interactive */
-  --accent: #7c9cff;
-  --focus-ring: #a9bcff;
+  --accent: #f2f3f5;
+  --accent-hover: #d6d8dc;
+  --focus-ring: #f2f3f5;
+
+  /* 3D body: nominal organs stay near-silver; only flagged ones take a status hue */
+  --organ-neutral: #9aa3ad;
 
   /* Data honesty chips */
   --source-sourced: #3ecf8e;
@@ -39,16 +48,18 @@
   --hazard-closed-environment: #fda4af;
 
   /* Shape, space, type */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-pill: 999px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
   --space-8: 32px;
-  --font-ui: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Syne", "Orbitron", system-ui, sans-serif; /* uppercase headings, self-hosted */
+  --font-ui: "Manrope", "DM Sans", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
   --touch-target: 48px; /* gloves, motion, low light */
 }

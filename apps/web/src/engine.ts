@@ -28,11 +28,10 @@ export function score(crewId: string, events: Event[]): Score {
   return JSON.parse(wasm.score(crewId, JSON.stringify(events)));
 }
 
-<<<<<<< HEAD
 export function draftSbar(assessment: Assessment, indicators: Indicator[]): Sbar {
   return JSON.parse(wasm.draft_sbar(JSON.stringify(assessment), JSON.stringify(indicators)));
-=======
+}
+
 export function dueTasks(input: AssessInput): Task[] {
   return JSON.parse(wasm.due_tasks(JSON.stringify(input)));
->>>>>>> web/today-checkin
 }
