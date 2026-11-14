@@ -127,7 +127,8 @@ pub fn apply(ctx: &Context) {
     v.hyperlink_color = ACCENT;
     // Keyboard-first: egui draws the keyboard focus ring with `selection.stroke`.
     v.selection.stroke = Stroke::new(2.0_f32, FOCUS_RING);
-    v.selection.bg_fill = SURFACE_RAISED;
+    // SURFACE_RAISED is ~1.1:1 on the dark background, so selected text vanished; carried over from #25.
+    v.selection.bg_fill = BORDER_STRONG;
     v.widgets.noninteractive.bg_stroke = Stroke::new(1.0_f32, BORDER);
     ctx.set_visuals(v);
 }
