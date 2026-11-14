@@ -27,6 +27,19 @@ export function Guidance({ model, store, indicatorId }: { model: Model; store: C
     if (action.kit_item) write({ type: "kit_use", item: action.kit_item, qty: 1 });
   };
 
+  const unit = indicators.find((i) => i.id === indicatorId)?.unit ?? "";
+  const num = (n: number) => String(Number(n.toPrecision(4)));
+  const b = status?.bands;
+  const ranges = b && (
+    <Card>
+      <h2>Ranges used {status && <SourceChip status={status.source_status} />}</h2>
+      <dl className="region-facts">
+        <div><dt>Nominal</dt><dd>{num(b.nominal_low)} to {num(b.nominal_high)} {unit}</dd></div>
+        <div><dt>Caution limits</dt><dd>{num(b.caution_low)} to {num(b.caution_high)} {unit}</dd></div>
+      </dl>
+    </Card>
+  );
+
   return (
     <div className="guidance">
       <div className="page-heading">
@@ -75,6 +88,7 @@ export function Guidance({ model, store, indicatorId }: { model: Model; store: C
           </Card>
         </>
       )}
+      {ranges}
       <div className="link-row">
         <a className="btn" href={`#/crew/measure/${indicatorId}`}>Measure again</a>
         <a className="btn" href={`#/crew/comms/send?indicator=${indicatorId}`}>Send to ground</a>
