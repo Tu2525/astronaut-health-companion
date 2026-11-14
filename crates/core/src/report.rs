@@ -36,8 +36,8 @@ pub fn draft_sbar(assessment: &Assessment, registry: &[Indicator]) -> Sbar {
         .map(|indicator| indicator.unit.as_str())
         .filter(|unit| !unit.is_empty());
     let with_unit = |value: f64| match unit {
-        Some(unit) => format!("{value} {unit}"),
-        None => value.to_string(),
+        Some(unit) => format!("{} {unit}", (value * 10.0).round() / 10.0),
+        None => ((value * 10.0).round() / 10.0).to_string(),
     };
     let mut background = Vec::new();
     if let Some(reading) = reading {
