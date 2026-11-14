@@ -4,11 +4,15 @@ import "../../../design/tokens.css";
 import "./styles.css";
 import { initEngine } from "./engine";
 import { CrewOverview } from "./faces/crew/body/CrewOverview";
+import { Library } from "./faces/crew/library/Library";
+import { Settings } from "./faces/crew/settings/Settings";
 import { createStore } from "./store";
 import type { CrewStore } from "./store";
 import { TopBar } from "./ui/TopBar";
 
 const CREW_ROUTE = "#/crew/body";
+const LIBRARY_ROUTE = "#/crew/library";
+const SETTINGS_ROUTE = "#/crew/settings";
 
 function subscribeRoute(listener: () => void) {
   window.addEventListener("hashchange", listener);
@@ -22,7 +26,7 @@ function App({ store }: { store: CrewStore }) {
     <>
       <TopBar model={model} />
       <main className="content">
-        {route === CREW_ROUTE ? <CrewOverview assessment={model.assessment} /> : (
+        {route === CREW_ROUTE ? <CrewOverview assessment={model.assessment} /> : route === LIBRARY_ROUTE ? <Library model={model} /> : route === SETTINGS_ROUTE ? <Settings model={model} store={store} /> : (
           <div className="page-heading">
             <h1>Page unavailable</h1>
             <a href={CREW_ROUTE}>Return to crew health</a>

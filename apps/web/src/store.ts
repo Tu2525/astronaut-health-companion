@@ -86,6 +86,11 @@ export function createStore() {
       events = updated;
       publish();
     },
+    updateSettings(patch: Partial<Settings>) {
+      settings = { ...readSettings(), ...patch };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      publish();
+    },
     skipTime(seconds: number) {
       const saved = readSettings();
       settings = { ...saved, met_offset_s: saved.met_offset_s + seconds };
