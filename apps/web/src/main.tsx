@@ -4,6 +4,7 @@ import "../../../design/tokens.css";
 import "./styles.css";
 import { initEngine } from "./engine";
 import { CrewOverview } from "./faces/crew/body/CrewOverview";
+import { Measure } from "./faces/crew/measure/Measure";
 import { createStore } from "./store";
 import type { CrewStore } from "./store";
 import { TopBar } from "./ui/TopBar";
@@ -22,7 +23,9 @@ function App({ store }: { store: CrewStore }) {
     <>
       <TopBar model={model} />
       <main className="content">
-        {route === CREW_ROUTE ? <CrewOverview assessment={model.assessment} /> : (
+        {route.startsWith("#/crew/measure") ? (
+          <Measure model={model} store={store} indicatorId={route.split("/")[3] ?? null} />
+        ) : route === CREW_ROUTE ? <CrewOverview assessment={model.assessment} /> : (
           <div className="page-heading">
             <h1>Page unavailable</h1>
             <a href={CREW_ROUTE}>Return to crew health</a>
