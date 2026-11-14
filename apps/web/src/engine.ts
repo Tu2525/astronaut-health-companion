@@ -1,18 +1,10 @@
 import type { AssessInput } from "./contract/AssessInput";
 import type { Assessment } from "./contract/Assessment";
+import type { Demo } from "./contract/Demo";
 import type { Event } from "./contract/Event";
 import type { Indicator } from "./contract/Indicator";
-import type { KitItem } from "./contract/KitItem";
 import type { Score } from "./contract/Score";
 import init, * as wasm from "./engine-pkg/ahc_core_wasm.js";
-
-interface Demo {
-  crew_id: string;
-  now_met_s: number;
-  launch_earth_ms: number;
-  events: Event[];
-  kit: KitItem[];
-}
 
 export async function initEngine() {
   await init();
