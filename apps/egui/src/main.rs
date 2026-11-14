@@ -514,6 +514,11 @@ impl eframe::App for App {
                         .spacing([theme::SPACE_4, theme::SPACE_2])
                         .max_col_width(300.0)
                         .show(ui, |ui| {
+                            // Only "Why" wraps (it asks to, capped by max_col_width). Anything
+                            // else that wrapped would fold into the width left in view, which
+                            // for the last column can be almost nothing in a narrow window:
+                            // "Last measured" one letter per line, every row that tall.
+                            ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
                             for h in [
                                 "Indicator",
                                 "Value",
