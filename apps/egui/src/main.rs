@@ -3,6 +3,7 @@
 //! No status logic here: everything comes from `ahc_core::assess`, shaped for
 //! display by `board.rs`.
 mod board;
+mod entry;
 mod storage;
 mod theme;
 
@@ -29,7 +30,27 @@ struct App {
     mission_start_ms: f64,
     assessed_at: f64,
     board: Board,
+    draft: entry::Draft,
+    /// Result of the last quick entry: Ok(confirmation) or Err(why it was not logged).
+    entry_result: Option<Result<String, String>>,
+    /// Put the keyboard in the value field on the next frame (keyboard-first).
+    focus_entry: bool,
+    /// Whether the value field had focus at the end of the last frame. egui drops a
+    /// text field's focus on Esc before this frame's code runs, so Esc is matched
+    /// against this instead of the current focus.
+    entry_had_focus: bool,
 }
+
+/// A key press that is not an auto-repeat (holding Enter must not submit twice).
+fn pressed_once(i: &egui::InputState, key: egui::Key) -> bool {
+    i.events.iter().any(|e| {
+        matches!(e, egui::Event::Key { key: k, pressed: true, repeat: false, modifiers, .. }
+            if *k == key && modifiers.is_none())
+    })
+}
+
+/// Fixed id so the value field can be focused and checked before it is drawn.
+const ENTRY_FIELD: &str = "quick_entry_value";
 
 impl App {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
@@ -53,6 +74,165 @@ impl App {
             mission_start_ms,
             assessed_at: 0.0,
             board,
+            draft: entry::Draft::default(),
+            entry_result: None,
+            focus_entry: true,
+            entry_had_focus: false,
+        }
+    }
+
+    /// Logs the drafted reading: one `reading` event appended to the shared log,
+    /// then the board is re-assessed at once so the crew sees the engine's verdict.
+    fn submit_entry(&mut self) {
+        let Some(indicator) = self.registry.get(self.draft.selected) else {
+            return;
+        };
+        let value = match entry::parse_value(&self.draft.text) {
+            Ok(v) => v,
+            Err(e) => {
+                self.entry_result = Some(Err(e));
+                return;
+            }
+        };
+        let now_met_s = storage::now_met_s(
+            self.mission_start_ms,
+            storage::wall_ms(),
+            &self.settings,
+            &self.events,
+        );
+        let event = entry::reading_event(
+            entry::new_event_id(),
+            indicator,
+            value,
+            &self.settings,
+            now_met_s,
+        );
+        self.entry_result = Some(match storage::append_event(event) {
+            Ok(events) => {
+                let logged = format!(
+                    "Logged {} {} at MET {}.",
+                    indicator.name,
+                    board::format_value(value, &indicator.unit),
+                    board::format_met(now_met_s)
+                );
+                self.events = events;
+                self.notice = None;
+                self.draft.text.clear();
+                self.board = Self::assess_board(
+                    &self.events,
+                    &self.settings,
+                    &self.kit,
+                    &self.registry,
+                    self.mission_start_ms,
+                );
+                Ok(logged)
+            }
+            Err(e) => Err(e),
+        });
+    }
+
+    /// B2 Quick entry. Keyboard: Up/Down choose the indicator, Enter logs,
+    /// Esc clears, `/` jumps here from anywhere.
+    fn quick_entry(&mut self, ui: &mut egui::Ui) {
+        let len = self.registry.len();
+        if len == 0 {
+            ui.label("Quick entry unavailable: the indicator registry is empty.");
+            return;
+        }
+        let field = egui::Id::new(ENTRY_FIELD);
+        let ctx = ui.ctx().clone();
+        let focused = ctx.memory(|m| m.has_focus(field));
+        // Keys are taken before the text field sees them.
+        let (up, down, esc, slash) = ctx.input_mut(|i| {
+            let none = egui::Modifiers::NONE;
+            let up = focused && i.consume_key(none, egui::Key::ArrowUp);
+            let down = focused && i.consume_key(none, egui::Key::ArrowDown);
+            let esc = self.entry_had_focus && pressed_once(i, egui::Key::Escape);
+            // The field is the only text input, so "/" never means text elsewhere.
+            let slash = !focused && i.consume_key(none, egui::Key::Slash);
+            if slash {
+                // The typed "/" must not land in the field it focuses.
+                i.events
+                    .retain(|e| !matches!(e, egui::Event::Text(t) if t == "/"));
+            }
+            (up, down, esc, slash)
+        });
+        if up {
+            self.draft.step(-1, len);
+        }
+        if down {
+            self.draft.step(1, len);
+        }
+        if esc {
+            self.draft.text.clear();
+            self.entry_result = None;
+        }
+
+        ui.horizontal_wrapped(|ui| {
+            ui.label(RichText::new("Quick entry").heading().strong());
+            ui.add_space(theme::SPACE_2);
+            ui.label(
+                RichText::new("Up/Down: indicator · Enter: log · Esc: clear · /: jump here")
+                    .color(theme::TEXT_MUTED)
+                    .small(),
+            );
+        });
+        let mut submit = false;
+        ui.horizontal_wrapped(|ui| {
+            self.draft.selected = self.draft.selected.min(len - 1);
+            let picked_before = self.draft.selected;
+            let selected = &self.registry[picked_before];
+            egui::ComboBox::from_id_salt("quick_entry_indicator")
+                .width(240.0)
+                .selected_text(&selected.name)
+                .show_ui(ui, |ui| {
+                    for (i, ind) in self.registry.iter().enumerate() {
+                        ui.selectable_value(&mut self.draft.selected, i, &ind.name);
+                    }
+                });
+            let unit = selected.unit.clone();
+            let resp = ui.add(
+                egui::TextEdit::singleline(&mut self.draft.text)
+                    .id(field)
+                    .desired_width(120.0)
+                    .hint_text("value"),
+            );
+            ui.label(RichText::new(unit).strong());
+            // Enter makes a single-line field give up focus; take it back either way.
+            let enter_left = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+            if enter_left && ui.input(|i| pressed_once(i, egui::Key::Enter)) {
+                submit = true;
+            }
+            if ui.button(RichText::new("Log reading").strong()).clicked() {
+                submit = true;
+            }
+            // Picking an indicator with the mouse returns the keyboard to the field.
+            let picked = self.draft.selected != picked_before;
+            if self.focus_entry || slash || submit || esc || enter_left || picked {
+                resp.request_focus();
+                self.focus_entry = false;
+            }
+            self.entry_had_focus = resp.has_focus() || resp.lost_focus();
+        });
+        if submit {
+            self.submit_entry();
+        }
+        match &self.entry_result {
+            Some(Ok(msg)) => {
+                ui.label(RichText::new(msg).strong());
+            }
+            Some(Err(msg)) => {
+                ui.add(Label::new(RichText::new(msg).strong()).wrap());
+            }
+            None => {
+                ui.label(
+                    RichText::new(
+                        "Value in the unit shown. The engine judges it; nothing is edited or deleted.",
+                    )
+                    .color(theme::TEXT_MUTED)
+                    .small(),
+                );
+            }
         }
     }
 
@@ -224,6 +404,18 @@ fn source_chip(ui: &mut egui::Ui, s: ahc_core::SourceStatus) {
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.refresh(ctx);
+        // Drawn before the board so its result shows in the same frame.
+        egui::TopBottomPanel::bottom("quick_entry")
+            .frame(
+                Frame::new()
+                    .fill(theme::SURFACE_RAISED)
+                    .stroke(Stroke::new(1.0_f32, theme::BORDER))
+                    .inner_margin(Margin::symmetric(
+                        theme::SPACE_4 as i8,
+                        theme::SPACE_3 as i8,
+                    )),
+            )
+            .show(ctx, |ui| self.quick_entry(ui));
         let b = &self.board;
         egui::TopBottomPanel::top("banner")
             .frame(
