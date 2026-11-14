@@ -29,12 +29,63 @@ pub struct Row {
 }
 
 pub struct FlagCard {
+    /// Indicator id: the protocol panel remembers the chosen flag by it.
+    pub id: String,
     pub name: String,
     pub status: Status,
     pub summary: String,
     pub next_step: String,
     /// Index into `LADDER`.
     pub step: usize,
+    /// B3 protocol card for this flag.
+    pub protocol: Protocol,
+}
+
+/// B3 Protocol card: the engine's next step and the flag's actions as plain text,
+/// in the engine's order. The actions are alternatives from the registry, not a
+/// sequence. Which exist and whether each is available is the engine's call; this
+/// only adds how many of the kit item are left.
+pub struct Protocol {
+    pub next_step: String,
+    pub steps: Vec<ProtocolStep>,
+}
+
+pub struct ProtocolStep {
+    pub text: String,
+    pub kit: Option<KitNote>,
+}
+
+pub struct KitNote {
+    /// `electrolyte drink`, from the kit id `electrolyte_drink`.
+    pub item: String,
+    /// `None` when the item is not in the kit at all (never stocked), as opposed
+    /// to `Some(0)`, used up.
+    pub left: Option<u32>,
+    /// From the engine. False: none left, so the crew contacts ground.
+    pub available: bool,
+}
+
+/// `electrolyte_drink` -> `electrolyte drink`.
+pub fn kit_label(id: &str) -> String {
+    id.replace('_', " ")
+}
+
+fn protocol(f: &ahc_core::Flag, kit: &[ahc_core::KitItem]) -> Protocol {
+    Protocol {
+        next_step: f.next_step.clone(),
+        steps: f
+            .actions
+            .iter()
+            .map(|a| ProtocolStep {
+                text: a.action.text.clone(),
+                kit: a.action.kit_item.as_ref().map(|id| KitNote {
+                    item: kit_label(id),
+                    left: kit.iter().find(|k| &k.item == id).map(|k| k.qty),
+                    available: a.available,
+                }),
+            })
+            .collect(),
+    }
 }
 
 pub struct Board {
@@ -143,11 +194,13 @@ impl Board {
             .iter()
             .take(MAX_FLAGS)
             .map(|f| FlagCard {
+                id: f.indicator_id.clone(),
                 name: describe(&f.indicator_id).0,
                 status: f.status,
                 summary: f.summary.clone(),
                 next_step: f.next_step.clone(),
                 step: ladder_step(f.escalation),
+                protocol: protocol(f, &a.kit),
             })
             .collect();
 
@@ -247,11 +300,115 @@ mod tests {
             assert_eq!(r.source, ind.source_status);
         }
         for (card, flag) in b.flags.iter().zip(&a.flags) {
+            assert_eq!(card.protocol.steps.len(), flag.actions.len());
             assert_eq!(card.status, flag.status);
             assert_eq!(card.summary, flag.summary);
             assert_eq!(card.next_step, flag.next_step);
             assert_eq!(LADDER[card.step].0, flag.escalation);
         }
+    }
+
+    fn bp_138_then(extra: Vec<EventKind>) -> (Assessment, Board) {
+        let mut events = demo::events();
+        let mut push = |kind| {
+            let n = events.len();
+            events.push(Event {
+                id: format!("test-{n}"),
+                crew_id: demo::CREW_ID.into(),
+                met_s: demo::NOW_MET_S,
+                earth_ms: demo::LAUNCH_EARTH_MS + demo::NOW_MET_S * 1000.0,
+                environment: Environment::Transit,
+                author: demo::CREW_ID.into(),
+                kind,
+            })
+        };
+        push(EventKind::Reading {
+            indicator_id: "bp_systolic".into(),
+            value: 138.0,
+            device: "test".into(),
+            confidence: Confidence::High,
+        });
+        for k in extra {
+            push(k);
+        }
+        board_for(&input(events), &registry())
+    }
+
+    #[test]
+    fn protocol_lists_the_engine_actions_with_kit_left() {
+        let (a, b) = bp_138_then(Vec::new());
+        let flag = &a.flags[0];
+        assert_eq!(flag.indicator_id, "bp_systolic", "BP 138 is the top flag");
+        let p = &b.flags[0].protocol;
+        assert_eq!(p.next_step, flag.next_step);
+        assert_eq!(p.steps.len(), flag.actions.len());
+        for (step, fa) in p.steps.iter().zip(&flag.actions) {
+            assert_eq!(step.text, fa.action.text);
+            match (&step.kit, &fa.action.kit_item) {
+                (None, None) => {}
+                (Some(k), Some(id)) => {
+                    assert_eq!(k.item, kit_label(id));
+                    assert_eq!(k.available, fa.available);
+                    let left = a.kit.iter().find(|i| &i.item == id).map(|i| i.qty);
+                    assert_eq!(k.left, left);
+                }
+                other => panic!("kit mismatch: {:?}", other.1),
+            }
+        }
+        let drink = p.steps.iter().find_map(|s| s.kit.as_ref()).unwrap();
+        assert_eq!(drink.item, "electrolyte drink");
+        assert!(drink.available && drink.left > Some(0));
+    }
+
+    #[test]
+    fn protocol_shows_a_used_up_kit_item_as_the_engine_says() {
+        let used = EventKind::KitUse {
+            item: "electrolyte_drink".into(),
+            qty: 100,
+        };
+        let (a, b) = bp_138_then(vec![used]);
+        let fa = a.flags[0]
+            .actions
+            .iter()
+            .find(|x| x.action.kit_item.is_some())
+            .unwrap();
+        let k = b.flags[0]
+            .protocol
+            .steps
+            .iter()
+            .find_map(|s| s.kit.as_ref())
+            .unwrap();
+        assert_eq!(k.available, fa.available);
+        assert!(!k.available, "engine marks the used-up item unavailable");
+        assert_eq!(k.left, Some(0), "used up, not missing");
+    }
+
+    #[test]
+    fn protocol_tells_an_item_missing_from_the_kit_apart_from_used_up() {
+        let mut inp = input(demo::events());
+        inp.kit.retain(|k| k.item != "electrolyte_drink");
+        inp.events.push(Event {
+            id: "test-bp".into(),
+            crew_id: demo::CREW_ID.into(),
+            met_s: demo::NOW_MET_S,
+            earth_ms: demo::LAUNCH_EARTH_MS + demo::NOW_MET_S * 1000.0,
+            environment: Environment::Transit,
+            author: demo::CREW_ID.into(),
+            kind: EventKind::Reading {
+                indicator_id: "bp_systolic".into(),
+                value: 138.0,
+                device: "test".into(),
+                confidence: Confidence::High,
+            },
+        });
+        let (_, b) = board_for(&inp, &registry());
+        let k = b.flags[0]
+            .protocol
+            .steps
+            .iter()
+            .find_map(|s| s.kit.as_ref())
+            .unwrap();
+        assert_eq!((k.left, k.available), (None, false));
     }
 
     #[test]
