@@ -42,17 +42,9 @@ fn router() -> Router {
 async fn assess(
     Json(input): Json<AssessInput>,
 ) -> Result<Json<Assessment>, (StatusCode, Json<Value>)> {
-    if input
-        .registry
-        .iter()
-        .flatten()
-        .any(|indicator| indicator.ranges.is_empty())
-    {
-        return Err((
-            StatusCode::UNPROCESSABLE_ENTITY,
-            Json(json!({ "error": "Each registry indicator must define at least one range." })),
-        ));
-    }
+    ahc_core::validate(&input).map_err(|error| {
+        (StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": error })))
+    })?;
 
     Ok(Json(ahc_core::assess(&input)))
 }

@@ -10,7 +10,8 @@ pub const NOW_MET_S: f64 = 143.0 * 86400.0 + 6.0 * 3600.0 + 12.0 * 60.0;
 pub const LAUNCH_EARTH_MS: f64 = 1_780_272_000_000.0;
 
 /// The same simulated opening state is served by HTTP and WASM.
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, ts_rs::TS)]
+#[ts(export)]
 pub struct Demo {
     pub crew_id: &'static str,
     pub now_met_s: f64,
