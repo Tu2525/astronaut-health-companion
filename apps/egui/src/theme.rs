@@ -14,19 +14,30 @@ pub const STATUS_URGENT: Color32 = Color32::from_rgb(0xf0, 0x44, 0x5a);
 pub const STATUS_UNKNOWN: Color32 = Color32::from_rgb(0x8a, 0x93, 0xa6);
 
 // Surfaces
-pub const BG: Color32 = Color32::from_rgb(0x0b, 0x0f, 0x17);
-pub const SURFACE: Color32 = Color32::from_rgb(0x12, 0x18, 0x26);
-pub const SURFACE_RAISED: Color32 = Color32::from_rgb(0x1a, 0x22, 0x33);
-pub const BORDER: Color32 = Color32::from_rgb(0x26, 0x30, 0x46);
+pub const BG: Color32 = Color32::from_rgb(0x00, 0x00, 0x00);
+pub const SURFACE: Color32 = Color32::from_rgb(0x05, 0x06, 0x07);
+pub const SURFACE_RAISED: Color32 = Color32::from_rgb(0x0d, 0x0f, 0x12);
+/// Flag rows, ladder steps, action tiles.
+pub const SURFACE_SUNKEN: Color32 = Color32::from_rgb(0x0a, 0x0b, 0x0d);
+/// Hover fill, subtle row dividers.
+pub const SURFACE_HOVER: Color32 = Color32::from_rgb(0x15, 0x18, 0x1c);
+/// Top glow behind the web body stage (no egui use).
+pub const STAGE_GLOW: Color32 = Color32::from_rgb(0x14, 0x17, 0x1b);
+pub const BORDER: Color32 = Color32::from_rgb(0x23, 0x26, 0x2b);
+pub const BORDER_STRONG: Color32 = Color32::from_rgb(0x45, 0x4a, 0x52);
 
 // Text
-pub const TEXT: Color32 = Color32::from_rgb(0xe6, 0xea, 0xf2);
-pub const TEXT_MUTED: Color32 = Color32::from_rgb(0x8a, 0x93, 0xa6);
-pub const TEXT_ON_STATUS: Color32 = Color32::from_rgb(0x0b, 0x0f, 0x17);
+pub const TEXT: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+pub const TEXT_MUTED: Color32 = Color32::from_rgb(0x8b, 0x90, 0x97);
+pub const TEXT_ON_STATUS: Color32 = Color32::from_rgb(0x00, 0x00, 0x00);
 
 // Brand / interactive
-pub const ACCENT: Color32 = Color32::from_rgb(0x7c, 0x9c, 0xff);
-pub const FOCUS_RING: Color32 = Color32::from_rgb(0xa9, 0xbc, 0xff);
+pub const ACCENT: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0xd6, 0xd8, 0xdc);
+pub const FOCUS_RING: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+
+/// 3D body: nominal organs stay near-silver (web only; mirrored for completeness).
+pub const ORGAN_NEUTRAL: Color32 = Color32::from_rgb(0x9a, 0xa3, 0xad);
 
 // Data honesty chips
 pub const SOURCE_SOURCED: Color32 = Color32::from_rgb(0x3e, 0xcf, 0x8e);
@@ -41,9 +52,10 @@ pub const HAZARD_GRAVITY: Color32 = Color32::from_rgb(0xa3, 0xe6, 0x35);
 pub const HAZARD_CLOSED_ENVIRONMENT: Color32 = Color32::from_rgb(0xfd, 0xa4, 0xaf);
 
 // Shape, space, type (points; the CSS px values map 1:1)
-pub const RADIUS_SM: f32 = 6.0;
-pub const RADIUS_MD: f32 = 12.0;
-pub const RADIUS_LG: f32 = 20.0;
+pub const RADIUS_SM: f32 = 2.0;
+pub const RADIUS_MD: f32 = 4.0;
+pub const RADIUS_LG: f32 = 6.0;
+pub const RADIUS_PILL: f32 = 999.0;
 pub const SPACE_1: f32 = 4.0;
 pub const SPACE_2: f32 = 8.0;
 pub const SPACE_3: f32 = 12.0;
@@ -52,7 +64,8 @@ pub const SPACE_6: f32 = 24.0;
 pub const SPACE_8: f32 = 32.0;
 /// Gloves, motion, low light.
 pub const TOUCH_TARGET: f32 = 48.0;
-// `--font-ui` and `--font-mono` are font stacks; egui's built-in fonts are used for now.
+// `--font-display`, `--font-ui` and `--font-mono` are font stacks; egui's built-in
+// fonts are used for now (the web self-hosts its display font).
 
 /// Colour, icon glyph and word for a status (docs/contract.md section 2).
 /// The board draws the icon as a shape; the glyph is kept for text-only uses.
@@ -101,7 +114,8 @@ pub fn apply(ctx: &Context) {
     v.hyperlink_color = ACCENT;
     // Keyboard-first: egui draws the keyboard focus ring with `selection.stroke`.
     v.selection.stroke = Stroke::new(2.0_f32, FOCUS_RING);
-    v.selection.bg_fill = SURFACE_RAISED;
+    // Selected text and rows: SURFACE_RAISED is ~1.1:1 on the black v4 background.
+    v.selection.bg_fill = BORDER_STRONG;
     v.widgets.noninteractive.bg_stroke = Stroke::new(1.0_f32, BORDER);
     ctx.set_visuals(v);
 }
@@ -123,12 +137,18 @@ mod tests {
             ("bg", BG),
             ("surface", SURFACE),
             ("surface-raised", SURFACE_RAISED),
+            ("surface-sunken", SURFACE_SUNKEN),
+            ("surface-hover", SURFACE_HOVER),
+            ("stage-glow", STAGE_GLOW),
             ("border", BORDER),
+            ("border-strong", BORDER_STRONG),
             ("text", TEXT),
             ("text-muted", TEXT_MUTED),
             ("text-on-status", TEXT_ON_STATUS),
             ("accent", ACCENT),
+            ("accent-hover", ACCENT_HOVER),
             ("focus-ring", FOCUS_RING),
+            ("organ-neutral", ORGAN_NEUTRAL),
             ("source-sourced", SOURCE_SOURCED),
             ("source-adapted", SOURCE_ADAPTED),
             ("source-placeholder", SOURCE_PLACEHOLDER),
@@ -146,6 +166,7 @@ mod tests {
                 ("radius-sm", RADIUS_SM),
                 ("radius-md", RADIUS_MD),
                 ("radius-lg", RADIUS_LG),
+                ("radius-pill", RADIUS_PILL),
                 ("space-1", SPACE_1),
                 ("space-2", SPACE_2),
                 ("space-3", SPACE_3),

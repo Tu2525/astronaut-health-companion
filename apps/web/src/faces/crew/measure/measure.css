@@ -1,0 +1,46 @@
+.measure-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.measure-row {
+  display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-4);
+  min-height: var(--touch-target); padding: var(--space-4);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--text); text-decoration: none;
+}
+.measure-row:hover { border-color: var(--accent); }
+.measure-name { font-weight: 600; }
+.measure-last { color: var(--text-muted); font: .82rem var(--font-mono); }
+.measure-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.measure-steps { margin: var(--space-4) 0 0; padding-inline-start: 1.4rem; display: grid; gap: var(--space-3); line-height: 1.45; }
+.unit-toggle { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+.unit-toggle button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--surface-sunken); }
+.measure-display { display: flex; align-items: baseline; gap: var(--space-3); margin-block: var(--space-4); }
+.measure-display input {
+  flex: 1; min-width: 0; min-height: 64px; padding-inline: var(--space-4);
+  font: 2rem var(--font-mono); color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.measure-display span { color: var(--text-muted); font-family: var(--font-mono); }
+.measure-error { color: var(--status-urgent); margin-bottom: var(--space-3); }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.keypad button { min-height: 64px; font-size: 1.4rem; font-family: var(--font-mono); }
+.keypad .keypad-wide { grid-column: span 3; font: inherit; min-height: var(--touch-target); }
+.measure-meta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-block: var(--space-4); }
+.measure-meta label { display: grid; gap: var(--space-1); color: var(--text-muted); font-size: .85rem; }
+.measure-meta input, .measure-meta select {
+  min-height: var(--touch-target); padding-inline: var(--space-3); font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.measure-submit, .button-link {
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch-target);
+  padding-inline: var(--space-6); border-radius: var(--radius-sm); font-weight: 650; text-decoration: none;
+}
+.measure-submit, .button-link.primary { background: var(--accent); color: var(--bg); border: 1px solid var(--accent); }
+.measure-submit { width: 100%; }
+.result-status { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block: var(--space-4); font-size: 1.3rem; }
+.result-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+@media (max-width: 720px) {
+  .measure-grid { grid-template-columns: 1fr; }
+  .measure-row { grid-template-columns: 1fr auto; }
+  .measure-last { grid-column: 1; }
+}
+.measure-display input[data-active] { border-color: var(--text); } /* the field the keypad types into */
+@media (max-width: 720px) { .measure-grid, .measure-meta { grid-template-columns: minmax(0, 1fr); } }

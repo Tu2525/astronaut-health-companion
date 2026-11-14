@@ -1,0 +1,128 @@
+/* A1 Body view. Tokens only (design/tokens.css); neutrals the reference hard-coded are colour-mix() of tokens. */
+.body-home {
+  --divider: color-mix(in srgb, var(--bg) 82%, var(--text));
+  --shade: color-mix(in srgb, var(--bg) 60%, transparent);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 380px);
+  gap: var(--space-4);
+  align-items: start;
+}
+.body-stage { display: flex; flex-direction: column; padding: var(--space-6); border-radius: var(--radius-lg); background: linear-gradient(180deg, var(--surface-sunken), var(--bg)); }
+.body-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.body-head p, .body-muted { color: var(--text-muted); }
+.body-head p { margin-top: 6px; max-width: 46ch; }
+.body-sim {
+  flex: none; padding: 3px 8px; border: 1px solid currentColor; border-radius: var(--radius-sm);
+  color: var(--source-placeholder); font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+}
+
+/* hero: legend | model. Under the model on phones. */
+.body-hero { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-4); align-items: center; margin-top: var(--space-4); flex: 1; }
+.body-hero[data-model="off"] { grid-template-columns: minmax(0, 1fr); }
+.body-hero[data-model="off"] .body-rlist { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.body-legend h2 {
+  margin: 0 0 var(--space-2) var(--space-3); color: var(--text-muted);
+  font: 600 11px var(--font-ui); letter-spacing: .14em; text-transform: uppercase;
+}
+.body-rlist { display: grid; gap: 2px; }
+.body-rrow {
+  --c: var(--status-unknown);
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "i n" "i c" "i m";
+  gap: 3px var(--space-2); align-items: start; justify-items: start; text-align: left;
+  min-height: 44px; padding: var(--space-2) 10px; border: 0; border-bottom: 1px solid var(--divider);
+  border-radius: var(--radius-sm); background: none; transition: background .15s, opacity .25s;
+}
+.body-rrow[data-s="nominal"] { --c: var(--status-nominal); }
+.body-rrow[data-s="watch"] { --c: var(--status-watch); }
+.body-rrow[data-s="caution"] { --c: var(--status-caution); }
+.body-rrow[data-s="urgent"] { --c: var(--status-urgent); }
+.body-rrow:hover { background: var(--surface-hover); }
+.body-rrow[aria-pressed="true"] { background: var(--surface-sunken); outline: 1px solid var(--border); }
+.body-rrow[data-dim] { opacity: .35; }
+.body-rrow:active { transform: scale(.98); transition: transform 80ms ease-out; }
+.body-rico {
+  grid-area: i; display: grid; place-items: center; width: 32px; height: 32px; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: var(--radius-sm); transition: color .2s, border-color .2s, background .2s;
+}
+.body-rrow:not([data-s="nominal"]) .body-rico {
+  color: var(--c); border-color: color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 10%, transparent);
+}
+.body-rrow[aria-pressed="true"]:not([data-s="nominal"]) .body-rico { border-color: var(--c); }
+.body-rname { grid-area: n; font-weight: 500; font-size: .9rem; line-height: 1.25; }
+.body-rrow .status-chip { grid-area: c; font-size: 10px; }
+.body-rmeta { grid-area: m; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-size: .75rem; }
+
+/* viewer */
+.body-viewer { position: relative; width: 100%; height: clamp(460px, calc(100dvh - 330px), 900px); touch-action: none; }
+.body-viewer canvas { display: block; cursor: grab; outline: none; }
+.body-viewer canvas:active { cursor: grabbing; }
+.body-hint, .body-load {
+  position: absolute; color: var(--text-muted); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; pointer-events: none;
+}
+.body-hint { inset: auto 0 8px; text-align: center; } /* below the feet: at the top it sat on the head */
+.body-load { inset: 0; display: grid; place-items: center; }
+.body-reset {
+  position: absolute; right: 0; top: 0; min-height: 44px; padding: 0 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--shade); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  transform-origin: top right; animation: body-pop .3s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes body-pop { from { opacity: 0; scale: .92; } }
+
+/* hazard lens */
+.body-lens { display: flex; flex-wrap: nowrap; justify-content: safe center; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: var(--space-2); margin-top: var(--space-4); }
+.body-lens button {
+  --h: var(--text-muted);
+  min-height: 36px; padding: 0 12px; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted);
+  flex: none; scroll-snap-align: start; white-space: nowrap; line-height: 1; display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; transition: transform .12s, border-color .15s, color .15s;
+}
+.body-lens button svg { color: var(--h); flex: none; display: block; }
+@media (pointer: coarse) { .body-lens button { min-height: 44px; } }
+.body-lens button:hover { color: var(--text); }
+.body-lens button:active { transform: scale(.97); }
+.body-lens button[aria-pressed="true"] { color: var(--text); border-color: var(--h); box-shadow: inset 0 0 0 1px var(--h); }
+
+/* side column */
+.body-side { display: grid; gap: var(--space-4); }
+.body-side .card { border-radius: var(--radius-lg); padding: var(--space-4); }
+.body-side h2 { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
+.body-side h3 { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); font: 700 1rem var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
+.body-calm { color: var(--text-muted); }
+.body-flags, .body-inds { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.body-flags li {
+  --c: var(--status-unknown); padding: var(--space-3) var(--space-4); border: 1px solid var(--border);
+  border-left: 4px solid var(--c); border-radius: var(--radius-sm); background: var(--surface-sunken);
+}
+.body-flags li[data-s="watch"] { --c: var(--status-watch); }
+.body-flags li[data-s="caution"] { --c: var(--status-caution); }
+.body-flags li[data-s="urgent"] { --c: var(--status-urgent); }
+.body-flag-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: .85rem; }
+.body-flag-summary { margin-top: var(--space-2); font-weight: 600; }
+.body-flag-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-2); }
+.body-flag-links button { min-height: 44px; }
+.body-flag-links a, .body-open, .body-inds a { display: inline-flex; align-items: center; min-height: 44px; }
+.body-inds li { padding-bottom: var(--space-3); border-bottom: 1px solid var(--divider); }
+.body-ind-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.body-inds p { margin-top: var(--space-1); font-size: .88rem; }
+
+@media (max-width: 1180px) {
+  .body-home { grid-template-columns: minmax(0, 1fr); }
+  .body-side { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+}
+@media (max-width: 860px) {
+  .body-stage { padding: var(--space-4); }
+  .body-hero { grid-template-columns: minmax(0, 1fr); }
+  .body-legend { order: 2; width: 100%; }
+  .body-viewer { height: min(560px, 70vh); }
+  .body-lens { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body-reset { animation: none; }
+  .body-home * { transition-duration: .01ms !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .body-reset { background: var(--surface-raised); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .body-home .card { border-color: var(--text-muted); }
+}

@@ -1,0 +1,30 @@
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.settings-grid h2 { margin-bottom: var(--space-4); }
+.settings-grid h3 { margin: var(--space-4) 0 var(--space-2); }
+.licences-card { grid-column: 1 / -1; }
+.setting-note { color: var(--text-muted); font-size: .9rem; line-height: 1.45; margin-top: var(--space-2); }
+.field { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.field label, .toggle span { font-weight: 600; }
+.field select {
+  min-height: var(--touch-target);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font: inherit;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-target);
+  cursor: pointer;
+}
+.toggle input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+.danger-button { margin-top: var(--space-4); border-color: var(--status-urgent); color: var(--status-urgent); }
+
+@media (max-width: 720px) {
+  .settings-grid { grid-template-columns: 1fr; }
+  .licences-card { grid-column: auto; }
+}
