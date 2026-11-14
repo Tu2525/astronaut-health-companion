@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- Safe-Mode Console, WASM build (SAFE-3). Built by trunk from apps/egui:
+     local dev:  trunk build --release --public-url /safe/ --dist ../web/public/safe
+     deploy:     trunk build --release --public-url /safe/ --dist ../web/dist/safe  (.github/workflows/deploy.yml)
+     Served at /safe/ on the web app's origin, so both share localStorage. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AHC Safe Mode</title>
+    <link data-trunk rel="rust" data-bin="ahc-safe" />
+    <style>
+      /* No colours here: the canvas paints the theme from design/tokens.css. */
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; overflow: hidden; }
+      #safe_canvas { display: block; width: 100%; height: 100%; }
+      #safe_status {
+        position: absolute; inset: 0; margin: 0;
+        display: grid; place-items: center;
+        font: 16px system-ui, "Segoe UI", Roboto, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="safe_canvas"></canvas>
+    <p id="safe_status" role="status">Loading safe mode…</p>
+    <noscript>
+      <style>#safe_status { display: none; }</style>
+      Safe mode needs JavaScript and WebAssembly enabled.
+    </noscript>
+    <script>
+      // If the WASM never starts (blocked or failed download), say so instead of loading forever.
+      setTimeout(function () {
+        var s = document.getElementById("safe_status");
+        if (s && s.textContent === "Loading safe mode…") {
+          s.textContent = "Safe mode could not start: the WebAssembly file did not load. Reload the page to try again.";
+        }
+      }, 20000);
+    </script>
+  </body>
+</html>
