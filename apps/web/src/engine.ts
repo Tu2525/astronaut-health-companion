@@ -1,3 +1,4 @@
+import type { Sbar } from "./contract/Sbar";
 import type { AssessInput } from "./contract/AssessInput";
 import type { Assessment } from "./contract/Assessment";
 import type { Demo } from "./contract/Demo";
@@ -24,4 +25,8 @@ export function demo(): Demo {
 
 export function score(crewId: string, events: Event[]): Score {
   return JSON.parse(wasm.score(crewId, JSON.stringify(events)));
+}
+
+export function draftSbar(assessment: Assessment, indicators: Indicator[]): Sbar {
+  return JSON.parse(wasm.draft_sbar(JSON.stringify(assessment), JSON.stringify(indicators)));
 }

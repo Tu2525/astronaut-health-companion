@@ -1,6 +1,6 @@
 const DAY_SECONDS = 86_400;
 export const MISSION_START_KEY = "ahc.mission_start.v1";
-const wallTime = () => performance.timeOrigin + performance.now();
+export const wallTime = () => performance.timeOrigin + performance.now();
 
 export function createClock(seedMet: number, launchEarthMs: number, startedAt: number) {
   return {
