@@ -6,6 +6,7 @@ import { initEngine } from "./engine";
 import { CrewOverview } from "./faces/crew/body/CrewOverview";
 import { createStore } from "./store";
 import type { CrewStore } from "./store";
+import { SafeModeBoundary } from "./ui/SafeModeBoundary";
 import { TopBar } from "./ui/TopBar";
 
 const CREW_ROUTE = "#/crew/body";
@@ -38,7 +39,7 @@ root.render(<main className="content" role="status">Loading mission assessmentâ€
 
 void initEngine().then(() => {
   const store = createStore();
-  root.render(<App store={store} />);
+  root.render(<SafeModeBoundary><App store={store} /></SafeModeBoundary>);
   import.meta.hot?.dispose(() => { store.dispose(); root.unmount(); });
 }).catch((error: unknown) => {
   console.error(error);
@@ -46,6 +47,7 @@ void initEngine().then(() => {
     <main className="content boot-error" role="alert">
       <h1>Mission assessment unavailable</h1>
       <p>The assessment could not be loaded.</p>
+      <a className="button-link" href="./safe/">Open safe mode</a>
       <button onClick={() => location.reload()}>Reload</button>
     </main>,
   );
