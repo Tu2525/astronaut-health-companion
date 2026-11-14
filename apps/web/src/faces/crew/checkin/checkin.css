@@ -1,0 +1,25 @@
+.checkin-card { display: grid; gap: var(--space-6); max-width: 560px; }
+.scale { border: 0; margin: 0; padding: 0; min-width: 0; }
+.scale legend { font-weight: 600; margin-bottom: var(--space-2); padding: 0; }
+.scale-options { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-2); }
+.scale-options label { position: relative; display: block; }
+.scale-options input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.scale-options span {
+  display: grid; place-items: center; min-height: var(--touch-target);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface-raised); font: 600 1.1rem var(--font-mono);
+}
+.scale-options input:checked + span { background: var(--accent); color: var(--text-on-status); border-color: var(--accent); }
+.scale-options input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.scale-ends { display: flex; justify-content: space-between; margin-top: var(--space-1); font-size: .8rem; color: var(--text-muted); }
+.note { display: grid; gap: var(--space-2); }
+.note textarea {
+  font: inherit; color: var(--text); background: var(--surface-raised);
+  border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3);
+}
+.note textarea:focus-visible, .submit:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.submit {
+  min-height: var(--touch-target); border: 0; border-radius: var(--radius-md);
+  background: var(--accent); color: var(--text-on-status); font: 600 1rem var(--font-ui); cursor: pointer;
+}
+.submit:disabled { background: var(--surface-raised); color: var(--text-muted); cursor: not-allowed; }

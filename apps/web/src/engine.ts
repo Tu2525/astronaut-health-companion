@@ -4,6 +4,7 @@ import type { Demo } from "./contract/Demo";
 import type { Event } from "./contract/Event";
 import type { Indicator } from "./contract/Indicator";
 import type { Score } from "./contract/Score";
+import type { Task } from "./contract/Task";
 import init, * as wasm from "./engine-pkg/ahc_core_wasm.js";
 
 export async function initEngine() {
@@ -24,4 +25,8 @@ export function demo(): Demo {
 
 export function score(crewId: string, events: Event[]): Score {
   return JSON.parse(wasm.score(crewId, JSON.stringify(events)));
+}
+
+export function dueTasks(input: AssessInput): Task[] {
+  return JSON.parse(wasm.due_tasks(JSON.stringify(input)));
 }
