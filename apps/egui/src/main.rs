@@ -39,6 +39,19 @@ struct App {
     /// text field's focus on Esc before this frame's code runs, so Esc is matched
     /// against this instead of the current focus.
     entry_had_focus: bool,
+    /// The flag whose protocol the crew picked, by indicator id, with the engine's top
+    /// flag (id and status) at that moment. `None` = show the top flag.
+    protocol_flag: Option<ProtocolPick>,
+}
+
+struct ProtocolPick {
+    id: String,
+    top: (String, Status),
+}
+
+/// The engine's top flag as (id, status), to notice when it changes.
+fn top_flag(b: &Board) -> Option<(String, Status)> {
+    b.flags.first().map(|f| (f.id.clone(), f.status))
 }
 
 /// A key press that is not an auto-repeat (holding Enter must not submit twice).
@@ -78,6 +91,7 @@ impl App {
             entry_result: None,
             focus_entry: true,
             entry_had_focus: false,
+            protocol_flag: None,
         }
     }
 
@@ -373,8 +387,11 @@ fn ladder(ui: &mut egui::Ui, step: usize, colour: Color32) {
     });
 }
 
-fn flag_card(ui: &mut egui::Ui, f: &FlagCard) {
+/// One flag. `choose` is `Some(shown)` when there is more than one flag, so the card
+/// offers to show its protocol; returns true when that is clicked.
+fn flag_card(ui: &mut egui::Ui, f: &FlagCard, choose: Option<bool>) -> bool {
     let (c, _, _) = theme::status_look(f.status);
+    let mut clicked = false;
     card().show(ui, |ui| {
         ui.set_width(ui.available_width());
         ui.horizontal(|ui| {
@@ -387,8 +404,89 @@ fn flag_card(ui: &mut egui::Ui, f: &FlagCard) {
             ui.label(RichText::new("Escalation:").color(theme::TEXT_MUTED));
             ladder(ui, f.step, c);
         });
+        match choose {
+            Some(true) => {
+                ui.label(
+                    RichText::new("Protocol shown")
+                        .color(theme::TEXT_MUTED)
+                        .small(),
+                );
+            }
+            Some(false) => clicked = ui.button("Show protocol").clicked(),
+            None => {}
+        }
     });
+    clicked
 }
+
+/// B3 Protocol card: the engine's next step and the flag's actions as plain text.
+/// Nothing here is chosen or ranked; it is the flag the crew picked (top flag by default).
+fn protocol_card(ui: &mut egui::Ui, f: Option<&FlagCard>) {
+    ui.heading("Protocol");
+    let Some(f) = f else {
+        ui.add(Label::new(RichText::new("No active flags.").color(theme::TEXT_MUTED)).wrap());
+        return;
+    };
+    let (c, _, _) = theme::status_look(f.status);
+    // Compact on purpose: the whole card must fit a 500 px window above quick entry.
+    ui.horizontal_wrapped(|ui| {
+        status_badge(ui, f.status, 16.0);
+        ui.label(RichText::new(&f.name).strong());
+        // Non-breaking spaces: the step wraps as one piece, never "[ 2" / "Self-care ]".
+        let step = format!("[ {} {} ]", f.step + 1, LADDER[f.step].1).replace(' ', "\u{a0}");
+        ui.label(RichText::new(step).color(c).strong());
+    });
+    ui.add(
+        Label::new(RichText::new(format!("Next step: {}", f.protocol.next_step)).strong()).wrap(),
+    );
+    if f.protocol.steps.is_empty() {
+        ui.add(
+            Label::new("No onboard actions are listed for this flag. Follow the next step.").wrap(),
+        );
+    } else {
+        // Registry actions are alternatives, not a sequence: a plain list, no numbers.
+        ui.label(RichText::new("Actions:").color(theme::TEXT_MUTED));
+        for s in &f.protocol.steps {
+            // The kit note sits on the action's own line, so it is never scrolled away.
+            ui.horizontal_wrapped(|ui| {
+                ui.label(format!("- {}", s.text));
+                if let Some(k) = &s.kit {
+                    let note = match (k.available, k.left) {
+                        (true, Some(n)) => RichText::new(format!("Kit: {}, {n} left.", k.item))
+                            .color(theme::TEXT_MUTED),
+                        (true, None) => {
+                            RichText::new(format!("Kit: {}.", k.item)).color(theme::TEXT_MUTED)
+                        }
+                        (false, Some(_)) => {
+                            RichText::new(format!("Kit: {} used up. Contact ground.", k.item))
+                                .strong()
+                        }
+                        (false, None) => {
+                            RichText::new(format!("Kit: no {} in the kit. Contact ground.", k.item))
+                                .strong()
+                        }
+                    };
+                    ui.label(note);
+                }
+            });
+        }
+    }
+    ui.add_space(theme::SPACE_2);
+    ui.add(
+        Label::new(
+            RichText::new(
+                "No medication doses here. For anything beyond these steps, contact the flight surgeon.",
+            )
+            .color(theme::TEXT_MUTED)
+            .small(),
+        )
+        .wrap(),
+    );
+}
+
+/// Wide windows get the protocol as a fixed side panel; narrow ones (phones,
+/// the browser pane) get it under the flags.
+const PROTOCOL_PANEL_MIN_WINDOW: f32 = 900.0;
 
 /// Outlined word, sized to its text. Painted by hand rather than with a `Frame`:
 /// in a `Grid` a frame grows to the previous frame's row height, so one tall frame
@@ -483,6 +581,40 @@ impl eframe::App for App {
                 }
             });
 
+        let width = ctx.screen_rect().width();
+        let wide = width >= PROTOCOL_PANEL_MIN_WINDOW;
+        // The flag the crew picked, by indicator id so a re-ranking never swaps it.
+        // The engine's top flag otherwise, and again as soon as the top flag changes
+        // or worsens: a new or worse problem must never hide behind an older pick.
+        let top = top_flag(b);
+        let pick_holds = self
+            .protocol_flag
+            .as_ref()
+            .is_some_and(|p| Some(&p.top) == top.as_ref());
+        let shown = self
+            .protocol_flag
+            .as_ref()
+            .filter(|_| pick_holds)
+            .and_then(|p| b.flags.iter().position(|f| f.id == p.id))
+            .unwrap_or(0);
+        let mut pick = None;
+        if wide {
+            egui::SidePanel::right("protocol")
+                .exact_width((width * 0.3).clamp(300.0, 420.0))
+                .resizable(false)
+                .frame(
+                    Frame::new()
+                        .fill(theme::SURFACE)
+                        .stroke(Stroke::new(1.0_f32, theme::BORDER))
+                        .inner_margin(Margin::same(theme::SPACE_4 as i8)),
+                )
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        protocol_card(ui, b.flags.get(shown));
+                    });
+                });
+        }
+
         egui::CentralPanel::default()
             .frame(
                 Frame::new()
@@ -496,8 +628,18 @@ impl eframe::App for App {
                     if b.flags.is_empty() {
                         ui.label(RichText::new("No active flags.").color(theme::TEXT_MUTED));
                     }
-                    for f in &b.flags {
-                        flag_card(ui, f);
+                    let several = b.flags.len() > 1;
+                    for (i, f) in b.flags.iter().enumerate() {
+                        if flag_card(ui, f, several.then_some(i == shown)) {
+                            pick = Some(i);
+                        }
+                    }
+                    if !wide {
+                        ui.add_space(theme::SPACE_2);
+                        card().show(ui, |ui| {
+                            ui.set_width(ui.available_width());
+                            protocol_card(ui, b.flags.get(shown));
+                        });
                     }
                     if b.more_flags > 0 {
                         ui.label(
@@ -545,6 +687,15 @@ impl eframe::App for App {
                         });
                 });
             });
+        if !pick_holds {
+            self.protocol_flag = None;
+        }
+        if let (Some(i), Some(top)) = (pick, top_flag(&self.board)) {
+            self.protocol_flag = self.board.flags.get(i).map(|f| ProtocolPick {
+                id: f.id.clone(),
+                top,
+            });
+        }
     }
 }
 
