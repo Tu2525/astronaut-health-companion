@@ -35,8 +35,8 @@ button:disabled { color: var(--text-muted); cursor: not-allowed; }
 .top-bar {
   position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: var(--space-6);
   height: 64px; padding: 0 var(--space-6);
-  background: var(--glass);
-  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); border-bottom: 1px solid var(--border);
+  /* Solid, not glass: text scrolling underneath bled through and hurt legibility. */
+  background: var(--bg); border-bottom: 1px solid var(--border);
 }
 .brand { font: 700 13px var(--font-display); text-transform: uppercase; letter-spacing: .14em; color: var(--text); text-decoration: none; white-space: nowrap; }
 .tb-item { display: flex; flex-direction: column; line-height: 1.2; white-space: nowrap; }
@@ -132,7 +132,7 @@ button:disabled { color: var(--text-muted); cursor: not-allowed; }
   .overview-grid { grid-template-columns: 1fr; }
   .rail {
     position: fixed; inset: auto 0 0 0; z-index: 30; flex-direction: row; gap: 0; align-items: stretch;
-    background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+    background: var(--bg);
     border-top: 1px solid var(--border); padding: 0 0 env(safe-area-inset-bottom);
   }
   .rail a, .rail-more { flex: 1 1 0; min-width: 0; justify-content: center; padding: 0 2px; letter-spacing: .06em; font-size: 10px; min-height: 56px; border-radius: 0; }
