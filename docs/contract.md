@@ -119,7 +119,7 @@ The scheduler uses the assessment to prompt an optional recheck for a drifting o
 Guided measurement cards, region detail, the library and the hazard lens all read from it. Do not copy these texts into the UI.
 
 Current ids: `heart_rate bp_systolic bp_diastolic body_temp blood_glucose spo2 sleep_hours mood stress radiation_dose`.
-No range is `sourced`: sleep and radiation are `adapted`, the rest `placeholder`. See `docs/sources.md`.
+No range is `sourced`: sleep, radiation and the six vitals are `adapted` (the vital bands are general clinical ranges, not NASA numbers; see the citation text), mood and stress are `placeholder`. See `docs/sources.md`.
 
 Unit conversion: `display = canonical * factor + offset` from `alt_units`. Log canonical.
 

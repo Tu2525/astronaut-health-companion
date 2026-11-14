@@ -8,7 +8,7 @@
     "expected_change": "A small change in resting heart rate in the first weeks of flight is a normal adaptation.",
     "ranges": [{ "env": null, "bands": { "nominal_low": 50, "nominal_high": 100, "caution_low": 40, "caution_high": 130 } }],
     "watch_drift_pct": 10, "stale_after_h": 36,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight heart rate is lower than pre-flight; NASA-STD-3001 Vol 1 Rev C [V1 3004] requires vital signs to be monitored and trended.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight heart rate is lower than pre-flight; NASA-STD-3001 Vol 1 Rev C [V1 3004] requires vital signs to be monitored and trended.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "adapted" },
     "actions": [
       { "id": "hr_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null },
       { "id": "hr_hydrate", "text": "Drink one electrolyte drink.", "kit_item": "electrolyte_drink" }
@@ -23,7 +23,7 @@
     "expected_change": "Blood pressure often runs slightly lower in microgravity than on Earth.",
     "ranges": [{ "env": null, "bands": { "nominal_low": 90, "nominal_high": 130, "caution_low": 80, "caution_high": 160 } }],
     "watch_drift_pct": 10, "stale_after_h": 36,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight systolic and diastolic pressure are lower than pre-flight.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight systolic and diastolic pressure are lower than pre-flight.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "adapted" },
     "actions": [
       { "id": "bp_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null },
       { "id": "bp_hydrate", "text": "Drink one electrolyte drink.", "kit_item": "electrolyte_drink" },
@@ -39,7 +39,7 @@
     "expected_change": null,
     "ranges": [{ "env": null, "bands": { "nominal_low": 60, "nominal_high": 85, "caution_low": 50, "caution_high": 100 } }],
     "watch_drift_pct": 12, "stale_after_h": 36,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight systolic and diastolic pressure are lower than pre-flight.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): in-flight systolic and diastolic pressure are lower than pre-flight.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "adapted" },
     "actions": [{ "id": "bpd_rest", "text": "Rest for 15 minutes, then recheck.", "kit_item": null }]
   },
   {
@@ -52,7 +52,7 @@
     "expected_change": "Core temperature can run slightly higher during long missions.",
     "ranges": [{ "env": null, "bands": { "nominal_low": 36.1, "nominal_high": 37.5, "caution_low": 35.0, "caution_high": 38.5 } }],
     "watch_drift_pct": 2, "stale_after_h": 36,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HSRB Risk Record, Inadequate Food and Nutrition, Rev D (2025): ISS astronauts have documented higher core temperatures in flight, especially after exercise.", "url": "https://www.nasa.gov/wp-content/uploads/2025/08/food-risk-record-rev-d-web-final.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HSRB Risk Record, Inadequate Food and Nutrition, Rev D (2025): ISS astronauts have documented higher core temperatures in flight, especially after exercise.", "url": "https://www.nasa.gov/wp-content/uploads/2025/08/food-risk-record-rev-d-web-final.pdf", "status": "adapted" },
     "actions": [
       { "id": "temp_cool", "text": "Apply a cold pack and rest.", "kit_item": "cold_pack" },
       { "id": "temp_recheck", "text": "Recheck in 1 hour.", "kit_item": null }
@@ -68,7 +68,7 @@
     "expected_change": null,
     "ranges": [{ "env": null, "bands": { "nominal_low": 70, "nominal_high": 140, "caution_low": 54, "caution_high": 250 } }],
     "watch_drift_pct": 20, "stale_after_h": 60,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): some evidence that insulin resistance rises with spaceflight; no NASA glucose range.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: HRP Evidence Report, Risk of Cardiovascular Adaptations (2022): some evidence that insulin resistance rises with spaceflight; no NASA glucose range.", "url": "https://humanresearchroadmap.nasa.gov/Evidence/reports/Cardio%20Risk%20EB%202022%20FINAL_4-3-2023.pdf", "status": "adapted" },
     "actions": [
       { "id": "glu_tabs", "text": "If low: take glucose tabs as the kit card says, recheck in 15 minutes.", "kit_item": "glucose_tabs" },
       { "id": "glu_meal", "text": "Eat your scheduled meal; do not skip it.", "kit_item": null }
@@ -83,7 +83,7 @@
     "expected_change": null,
     "ranges": [{ "env": null, "bands": { "nominal_low": 95, "nominal_high": 100, "caution_low": 90, "caution_high": 100 } }],
     "watch_drift_pct": 3, "stale_after_h": 36,
-    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: NASA-STD-3001 Technical Brief OCHMO-TB-004 Rev D, Carbon Dioxide: cabin CO2 limits (V2 6004) are the life-support hazard behind this indicator. No NASA SpO2 range.", "url": "https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-004-carbon-dioxide.pdf", "status": "placeholder" },
+    "source": { "citation": "Numeric range is a general adult clinical band, not set by NASA. NASA context: NASA-STD-3001 Technical Brief OCHMO-TB-004 Rev D, Carbon Dioxide: cabin CO2 limits (V2 6004) are the life-support hazard behind this indicator. No NASA SpO2 range.", "url": "https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-004-carbon-dioxide.pdf", "status": "adapted" },
     "actions": [{ "id": "spo2_air", "text": "Move to a well-ventilated module, check the cabin CO2 reading, recheck.", "kit_item": null }]
   },
   {
