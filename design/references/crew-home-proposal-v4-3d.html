@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crew App home, proposal v4 (3D body)</title>
+<!-- PROPOSAL, not binding. Static mock of A1 Body view + A7 Guidance sheet. Colours come only from design/tokens.css. -->
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Syne:wght@600;700;800&display=swap">
+<style>
+  *{box-sizing:border-box;margin:0}
+  html{color-scheme:dark}
+  body{background:var(--bg);color:var(--text);font:400 15px/1.5 var(--font-ui);min-height:100dvh;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .muted{color:var(--text-muted)}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:var(--space-6);padding:0 var(--space-6);height:64px;
+    background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent)}
+  .brand{font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+  .tb-item{display:flex;flex-direction:column;line-height:1.2;white-space:nowrap}
+  .tb-item small{font-size:11px;color:var(--text-muted)}
+  .tb-item b{font-weight:500;font-size:14px}
+  .tb-spacer{flex:1}
+  .env{padding:6px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:13px}
+  .bell{min-width:var(--touch-target);height:var(--touch-target);border-radius:var(--radius-md);display:grid;place-items:center;position:relative}
+  .bell:hover{background:var(--surface)}
+  .bell i{font-style:normal;font-size:12px;position:absolute;top:6px;right:4px;background:var(--status-caution);color:var(--text-on-status);border-radius:999px;padding:0 6px;font-weight:600}
+
+  /* ---------- status chip: colour + glyph + word ---------- */
+  .chip{--c:var(--status-unknown);display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:500;
+    color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);white-space:nowrap}
+  .s-nominal{--c:var(--status-nominal)}.s-watch{--c:var(--status-watch)}.s-caution{--c:var(--status-caution)}.s-urgent{--c:var(--status-urgent)}.s-unknown{--c:var(--status-unknown)}
+  .src{font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+  .src-sourced{color:var(--source-sourced)}.src-adapted{color:var(--source-adapted)}.src-placeholder{color:var(--source-placeholder)}
+
+  /* ---------- shell ---------- */
+  .shell{display:grid;grid-template-columns:200px minmax(0,1fr) 392px;gap:var(--space-6);max-width:1480px;margin:0 auto;padding:var(--space-6)}
+  .rail{position:sticky;top:88px;align-self:start;display:flex;flex-direction:column;gap:2px}
+  .rail a{display:flex;align-items:center;min-height:var(--touch-target);padding:0 var(--space-4);border-radius:var(--radius-md);color:var(--text-muted);text-decoration:none;font-weight:500;transition:background .15s,color .15s}
+  .rail a:hover{background:var(--surface);color:var(--text)}
+  .rail a[aria-current]{background:var(--surface-raised);color:var(--text)}
+  .rail .sub{margin:var(--space-4) var(--space-4) 4px;font-size:12px;color:var(--text-muted)}
+
+  /* ---------- stage (body figure) ---------- */
+  .stage{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-6);min-height:640px;display:flex;flex-direction:column}
+  .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4)}
+  h1{font-size:clamp(1.6rem,2.6vw,2.1rem);line-height:1.1;letter-spacing:-.02em;font-weight:600}
+  .stage-head p{margin-top:6px;max-width:46ch}
+  .lens{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4)}
+  .lens button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface-raised);font-size:13px;font-weight:500;color:var(--text-muted);transition:transform .12s,border-color .15s,color .15s}
+  .lens button:active{transform:scale(.97)}
+  .lens button[aria-pressed=true]{color:var(--text);border-color:var(--h);box-shadow:inset 0 0 0 1px var(--h)}
+  .lens button::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--h);margin-right:8px}
+  .figure-wrap{flex:1;display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:var(--space-8);align-items:center;margin-top:var(--space-4)}
+  svg.body{width:100%;height:auto;max-height:560px;display:block;margin:auto}
+  .base{fill:var(--surface-raised);stroke:var(--border);stroke-width:1.5}
+  .reg{cursor:pointer;transition:opacity .25s}
+  .reg .shape{fill:color-mix(in srgb,var(--c) 34%,transparent);stroke:var(--c);stroke-width:1.5;transition:fill .3s,stroke .3s}
+  .reg.skin .shape{fill:none;stroke-width:2.5;stroke-dasharray:2 5;stroke-linecap:round}
+  .reg:hover .shape,.reg:focus-visible .shape{fill:color-mix(in srgb,var(--c) 55%,transparent)}
+  .reg:focus-visible{outline:none}.reg:focus-visible .shape{stroke:var(--focus-ring);stroke-width:3}
+  .reg.sel .shape{stroke-width:3}
+  .reg.dim{opacity:.22}
+  .reg.lit .shape{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 70%,transparent))}
+  .reg.urgent-pulse .shape{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{fill:color-mix(in srgb,var(--c) 58%,transparent)}}
+  .stale .shape{stroke-dasharray:4 3}
+
+  /* region list beside the figure (also the non-colour-only, keyboard/screen-reader path) */
+  .rlist{display:grid;gap:6px}
+  .rrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--space-3);min-height:44px;padding:4px 12px;border-radius:var(--radius-md);border:1px solid transparent;text-align:left;transition:background .15s,opacity .25s}
+  .rrow:hover{background:var(--surface-raised)}
+  .rrow[aria-pressed=true]{background:var(--surface-raised);border-color:var(--border)}
+  .rrow.dim{opacity:.35}
+  .rrow .n{font-weight:500}.rrow .m{font-size:12px;color:var(--text-muted)}
+
+  /* ---------- right column ---------- */
+  .side{display:flex;flex-direction:column;gap:var(--space-4)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-4)}
+  .card h2{font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:var(--space-3)}
+  .flag{--c:var(--status-unknown);display:block;width:100%;text-align:left;background:var(--surface-raised);border:1px solid var(--border);border-left:4px solid var(--c);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);margin-top:var(--space-3);transition:transform .12s,border-color .15s}
+  .flag:first-of-type{margin-top:0}
+  .flag:hover{border-color:var(--c)}.flag:active{transform:scale(.99)}
+  .flag b{display:block;font-weight:600;margin:8px 0 2px;letter-spacing:-.005em}
+  .flag span.next{display:block;color:var(--text-muted);font-size:14px}
+  .flag .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .calm{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-2) 0}
+  .calm p{color:var(--text-muted)}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .btn{min-height:var(--touch-target);border-radius:var(--radius-md);border:1px solid var(--border);background:var(--surface-raised);font-weight:500;padding:0 var(--space-4);transition:transform .12s,background .15s}
+  .btn:hover{background:color-mix(in srgb,var(--surface-raised) 80%,var(--text))}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--accent);color:var(--text-on-status);border-color:var(--accent);font-weight:600}
+  .btn.primary:hover{background:color-mix(in srgb,var(--accent) 88%,var(--text))}
+  .detail h3{font-size:1.15rem;letter-spacing:-.01em;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .detail p{margin-top:8px;color:var(--text-muted);font-size:14px}
+  .detail .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--space-3);align-items:center}
+  .detail .meta .mono{font-size:12px;color:var(--text-muted)}
+  .honesty{font-size:12px;color:var(--text-muted);padding:0 var(--space-2)}
+
+  /* ---------- guidance sheet (A7) ---------- */
+  .scrim{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--bg) 62%,transparent);opacity:0;pointer-events:none;transition:opacity .3s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;z-index:40;top:0;right:0;height:100dvh;width:min(520px,100%);background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);
+    border-left:1px solid var(--border);padding:var(--space-6);overflow:auto;transform:translateX(100%);transition:transform .42s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;gap:var(--space-4)}
+  .sheet.open{transform:none}
+  .sheet-top{display:flex;justify-content:space-between;align-items:center}
+  .x{min-width:var(--touch-target);height:var(--touch-target);border-radius:var(--radius-md);color:var(--text-muted)}.x:hover{background:var(--surface-raised);color:var(--text)}
+  .sheet h2{font-size:1.4rem;letter-spacing:-.02em;line-height:1.2;font-weight:600}
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;padding:0}
+  .ladder li{padding:10px 10px 12px;border-radius:var(--radius-md);background:var(--surface-raised);border:1px solid var(--border);font-size:13px;color:var(--text-muted);display:flex;flex-direction:column;gap:2px}
+  .ladder li b{color:var(--text);font-weight:600;font-size:14px}
+  .ladder li.cur{--c:var(--status-caution);border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface-raised));color:var(--text)}
+  .ladder li.cur::before{content:"You are here";font-size:11px;color:var(--c);font-weight:600}
+  .ladder li:not(.cur)::before{content:"";font-size:11px}
+  .tth{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3)}
+  .tth div{background:var(--surface-raised);border-radius:var(--radius-md);padding:var(--space-3)}
+  .tth small{display:block;font-size:11px;color:var(--text-muted)}.tth b{font-size:1.15rem;font-weight:600}
+  .act{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-raised)}
+  .act small{display:block;color:var(--text-muted);font-size:12px}
+  .act.off{opacity:.6}
+  .sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin-top:auto}
+  .sheet-actions .primary{grid-column:1/-1}
+
+  /* ---------- mock controls ---------- */
+  .mock{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:50;display:flex;gap:4px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--surface-raised) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border)}
+  .mock button{min-height:36px;padding:0 14px;border-radius:999px;font-size:13px;color:var(--text-muted);font-weight:500}
+  .mock button[aria-pressed=true]{background:var(--text);color:var(--bg)}
+  .mock span{align-self:center;padding:0 8px 0 12px;font-size:11px;color:var(--text-muted)}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1180px){.shell{grid-template-columns:minmax(0,1fr) 360px}.rail{display:none}}
+  @media (max-width:860px){
+    .shell{grid-template-columns:1fr;padding:var(--space-3);padding-bottom:140px}
+    .topbar{gap:var(--space-3);padding:0 var(--space-3);overflow-x:auto}
+    .tb-hide{display:none}
+    .figure-wrap{grid-template-columns:1fr}
+    svg.body{max-height:380px}
+    .stage{padding:var(--space-4);min-height:0}
+    .mock{bottom:8px;max-width:calc(100% - 16px);overflow-x:auto}.mock span{display:none}
+    .ladder{grid-template-columns:1fr 1fr}
+    .tth{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+  @media (prefers-contrast:more){.card,.stage{border-color:var(--text-muted)}}
+
+  /* =====================================================================
+     ZENO DIRECTION (proposal only). Style cues from the purchased kit:
+     true-black, wide uppercase display type, 1px outlines, ghost buttons,
+     thin progress bars. NO kit photos, logo or copy. Status colours stay
+     as in tokens.css. If adopted, these overrides move into tokens.css.
+     Fonts are loaded from Google here for the mock only; the app
+     self-hosts them (offline-first).
+     ===================================================================== */
+  :root{
+    --bg:#000; --surface:#050607; --surface-raised:#0d0f12; --border:#23262b;
+    --text:#f2f3f5; --text-muted:#8b9097;
+    --accent:#f2f3f5; --text-on-status:#000;
+    --radius-sm:2px; --radius-md:4px; --radius-lg:6px;
+    --font-display:"Syne","Orbitron",var(--font-ui);
+    --font-ui:"Manrope","DM Sans",system-ui,"Segoe UI",sans-serif;
+  }
+  body{background:radial-gradient(ellipse 60% 40% at 50% 0%,#14171b 0,#000 70%) no-repeat,#000;font-weight:400}
+  h1,.sheet h2,.brand,.card h2,.detail h3{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.04em}
+  h1{font-weight:700;font-size:clamp(1.8rem,3.4vw,3rem);line-height:1.02;letter-spacing:.03em}
+  .sheet h2{font-size:1.15rem;line-height:1.3;font-weight:700}
+  .brand{font-weight:700;letter-spacing:.14em;font-size:13px}
+  .card h2{font-size:11px;letter-spacing:.18em;font-weight:600}
+  .detail h3{font-size:1rem;font-weight:700}
+  .topbar{border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+  .tb-item small{text-transform:uppercase;letter-spacing:.14em;font-size:10px}
+  .env{border-radius:2px;background:transparent;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+  /* outlined, flat cards */
+  .stage,.card,.sheet{background:transparent;border:1px solid var(--border)}
+  .stage{background:linear-gradient(180deg,#07080a,#000)}
+  .card{background:#050607}
+  /* chips: outlined, squared, not filled */
+  .chip{border-radius:2px;background:transparent;text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:600;padding:3px 8px}
+  .src{border-radius:2px;text-transform:uppercase;letter-spacing:.1em;font-size:10px}
+  /* ghost buttons */
+  .btn,.lens button,.mock button{border-radius:2px;background:transparent;border:1px solid var(--border);text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:600}
+  .btn:hover,.lens button:hover{background:#15181c;border-color:#454a52}
+  .btn.primary{background:var(--text);color:#000;border-color:var(--text)}
+  .btn.primary:hover{background:#d6d8dc}
+  .lens button::before{border-radius:0;width:6px;height:6px}
+  .mock{border-radius:2px;background:#0d0f12e6}
+  .mock button[aria-pressed=true]{background:var(--text);color:#000;border-radius:2px}
+  .rail a{border-radius:2px;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:600}
+  .rail a[aria-current]{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .rrow{border-radius:2px;border-bottom:1px solid #15181c}
+  .rrow[aria-pressed=true]{background:#0d0f12;border-color:var(--border)}
+  .flag{border-radius:2px;background:#0a0b0d}
+  .act,.ladder li,.tth div{border-radius:2px;background:#0a0b0d}
+  .tth b,.tb-item b.mono{font-family:var(--font-display);font-weight:700}
+  .ladder li.cur::before{text-transform:uppercase;letter-spacing:.12em}
+  /* hairline-thin stat bars on the stage (Zeno progress bars) */
+  .bars{display:grid;gap:14px;margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--border)}
+  .bar{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:end;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted)}
+  .bar b{color:var(--text);font-family:var(--font-display);font-size:13px;letter-spacing:.06em}
+  .bar i{grid-column:1/-1;display:block;height:2px;background:#1a1d21}
+  .bar i::after{content:"";display:block;height:100%;width:var(--v);background:var(--c,var(--text))}
+  /* figure: faint halo + centre line, like the kit hero */
+  .figure-wrap{position:relative}
+  .base{fill:#0a0b0d;stroke:#2c3036}
+
+  /* =====================================================================
+     V3 HERO: suit telemetry. Centred photo, status pins on the suit,
+     leader-line callouts ONLY for what needs attention. Nominal pins stay
+     quiet. Photo is the Zeno kit astronaut, local demo only (not committed);
+     swap for a Blender render, same pin map.
+     ===================================================================== */
+  .stage{padding:var(--space-6) var(--space-6) var(--space-4);min-height:0}
+  .hero{position:relative;display:grid;place-items:center;padding:var(--space-4) 0 var(--space-6)}
+  .halo{position:absolute;inset:6% 18% 6%;background:radial-gradient(ellipse at 50% 45%,#ffffff14,transparent 62%);pointer-events:none}
+  .fig{position:relative;width:min(300px,62%);aspect-ratio:560/1040}
+  .photo{position:absolute;inset:0;overflow:hidden;-webkit-mask-image:radial-gradient(ellipse 62% 56% at 46% 48%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 62% 56% at 46% 48%,#000 58%,transparent 100%)}
+  .photo img{position:absolute;width:342.86%;left:-125%;top:-7.69%;max-width:none;filter:grayscale(.25) contrast(1.05) brightness(.95);user-select:none}
+  /* pins */
+  .pin{position:absolute;width:var(--touch-target);height:var(--touch-target);margin:-24px 0 0 -24px;display:grid;place-items:center;border-radius:50%;transition:opacity .25s}
+  .pin i{--d:10px;width:var(--d);height:var(--d);border-radius:50%;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 30%,#000);transition:transform .2s cubic-bezier(.22,1,.36,1),background .2s,box-shadow .2s;opacity:.55}
+  .pin:hover i,.pin.sel i{transform:scale(1.5);opacity:1}
+  .pin:active i{transform:scale(1.15)}
+  .pin.sel i{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 22%,transparent)}
+  .pin.s-caution i,.pin.s-urgent i,.pin.s-watch i{--d:14px;opacity:1;background:var(--c)}
+  .pin.s-unknown i{border-style:dashed;background:transparent}
+  .pin.s-caution i,.pin.s-urgent i{animation:ring 2.6s ease-in-out infinite}
+  @keyframes ring{50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--c) 0%,transparent),0 0 0 0 transparent}0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 45%,transparent)}}
+  .pin.dim{opacity:.18}.pin.lit i{box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 30%,transparent);opacity:1}
+  /* callouts + leader lines */
+  .lead{position:absolute;height:0;border-top:1px solid var(--c);opacity:.85;pointer-events:none}
+  .callout{position:absolute;transform:translateY(-50%);width:min(210px,32vw);text-align:left;display:grid;gap:6px;padding:10px 12px;border:1px solid var(--c);background:color-mix(in srgb,#000 70%,transparent);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);transition:transform .15s,background .15s}
+  .callout.r{left:calc(100% + 14px)}.callout.l{right:calc(100% + 14px)}
+  .callout:hover{background:color-mix(in srgb,var(--c) 10%,#000)}.callout:active{transform:translateY(-50%) scale(.98)}
+  .callout b{font-weight:600;font-size:13px;line-height:1.3;letter-spacing:0}
+  .callout .chip{border:0;padding:0;justify-self:start}
+  .all{border-top:1px solid var(--border);margin-top:var(--space-2)}
+  .all summary{min-height:var(--touch-target);display:flex;align-items:center;cursor:pointer;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:600;color:var(--text-muted)}
+  .all[open] summary{color:var(--text)}
+  .all .rlist{grid-template-columns:1fr 1fr;gap:0 var(--space-6);padding-bottom:var(--space-3)}
+  .lens{justify-content:center}
+  .bars{grid-template-columns:repeat(3,1fr);gap:var(--space-6)}
+  @media (max-width:860px){
+    .callout,.lead{display:none}
+    .fig{width:min(260px,70%)}
+    .all .rlist,.bars{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){.pin i{animation:none!important}}
+
+  /* =====================================================================
+     V4: 3D anatomy viewer. Model: Z-Anatomy (BodyParts3D), CC BY-SA 4.0,
+     merged into 10 region meshes in Blender. Organs glow in status colour
+     inside an X-ray shell. Pins and callouts are DOM, projected per frame.
+     ===================================================================== */
+  .viewer{position:relative;width:100%;height:min(620px,72vh);touch-action:none}
+  .viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;outline:none}
+  .viewer canvas:active{cursor:grabbing}
+  .leads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .leads line{stroke-width:1;opacity:.85}
+  #pins{position:absolute;inset:0;pointer-events:none}
+  #pins .pin,#pins .callout{pointer-events:auto;will-change:transform;left:0;top:0}
+  #pins .callout{position:absolute;transform:none}
+  #pins .callout:active{transform:none}
+  .pin.occluded i{opacity:.3}
+  .v-hint{position:absolute;left:0;top:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);pointer-events:none;transition:opacity .6s}
+  .v-reset{position:absolute;right:0;top:0;min-height:40px;padding:0 14px;border:1px solid var(--border);border-radius:2px;background:color-mix(in srgb,#000 60%,transparent);backdrop-filter:blur(10px);text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:600}
+  .v-reset:hover{border-color:#454a52}
+  .v-load{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);transition:opacity .5s;pointer-events:none}
+  .v-load.done{opacity:0}
+  .credit{font-size:11px;color:var(--text-muted);margin-top:var(--space-2)}
+  .credit a{color:inherit}
+  /* legend: every pressable organ, its status word and what is off. Also the non-colour, keyboard path. */
+  .hero{grid-template-columns:220px minmax(0,1fr);align-items:start;gap:var(--space-4)}
+  .hero>.viewer,.hero>.fig{grid-column:2;grid-row:1}
+  .legend{grid-column:1;grid-row:1;align-self:center;position:relative;z-index:1}
+  .lg-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--text-muted);margin:0 0 var(--space-2) 12px}
+  .legend .rlist{gap:2px}
+  .legend .rrow{padding:4px 10px;gap:var(--space-2)}
+  .legend .rrow .n{font-size:14px}
+  .legend .chip{font-size:10px}
+  /* icons */
+  .ico{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .ico.s{width:1.15em;height:1.15em;stroke-width:2.2}
+  .rrow{grid-template-columns:auto 1fr auto}
+  .rico{display:grid;place-items:center;width:32px;height:32px;border-radius:2px;color:var(--text-muted);border:1px solid var(--border);transition:color .2s,border-color .2s,background .2s}
+  .rrow:not(.s-nominal) .rico{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 10%,transparent)}
+  .rrow[aria-pressed=true] .rico{color:var(--text);border-color:var(--text-muted)}
+  .rrow:not(.s-nominal)[aria-pressed=true] .rico{color:var(--c);border-color:var(--c)}
+  .rrow:active{transform:scale(.98);transition:transform 80ms ease-out}
+  /* Apple pass: Whole body materializes from its corner; callouts grow out toward their pin */
+  .v-reset{transition:opacity .22s ease,scale .3s cubic-bezier(.22,1,.36,1),visibility 0s .22s;transform-origin:top right}
+  .v-reset:not(.on){opacity:0;scale:.92;visibility:hidden;pointer-events:none}
+  .v-reset.on{visibility:visible;transition-delay:0s}
+  #cos .callout{animation:co-in .32s cubic-bezier(.22,1,.36,1) both}
+  @keyframes co-in{from{opacity:0;scale:.9}}
+  @media (prefers-reduced-motion:reduce){#cos .callout{animation:co-fade .2s both}@keyframes co-fade{from{opacity:0}}.v-reset{scale:1!important}}
+  @media (prefers-reduced-transparency:reduce){.topbar,.sheet,.mock,.callout,.v-reset{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface-raised)}}
+  /* row: icon | name, chip under it, then what is off on its own line */
+  .legend .rrow{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i n" "i c" "i m";row-gap:3px;align-items:start;padding:8px 10px}
+  .legend .rrow>span:nth-child(2){display:contents}.legend .rrow br{display:none}
+  .legend .rico{grid-area:i}.legend .n{grid-area:n;line-height:1.25}.legend .chip{grid-area:c;justify-self:start}
+  .legend .rrow .m{grid-area:m;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:860px){.hero{grid-template-columns:1fr}.hero>.viewer,.hero>.fig,.legend{grid-column:1;grid-row:auto}.legend{order:2;width:100%}}
+  @media (max-width:860px){.viewer{height:min(560px,70vh)}#pins .callout{display:none}.leads{display:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <div class="brand">Health Companion</div>
+  <div class="tb-item"><small>Mission day</small><b class="mono">143 &nbsp;MET 143d 06:12</b></div>
+  <div class="tb-item tb-hide"><small>Earth</small><b class="mono">13:40 UTC</b></div>
+  <span class="env tb-hide">Mars transit</span>
+  <div class="tb-item tb-hide"><small>Comms</small><b class="mono">18 min one-way</b></div>
+  <div class="tb-spacer"></div>
+  <div class="tb-item" style="align-items:flex-end"><small>Overall</small><span id="overall" class="chip"></span></div>
+  <button class="bell" aria-label="Alert inbox, 2 unread">Alerts<i id="bellN">2</i></button>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Main">
+    <a href="#" aria-current="page">Home</a><a href="#">Today</a><a href="#">Trends</a><a href="#">Measure</a><a href="#">Crew</a>
+    <div class="sub">More</div>
+    <a href="#">Kit</a><a href="#">Ground</a><a href="#">Library</a><a href="#">Settings</a>
+  </nav>
+
+  <main>
+    <section class="stage" aria-labelledby="h">
+      <div class="stage-head">
+        <div>
+          <h1 id="h"></h1>
+          <p class="muted" id="sub"></p>
+        </div>
+        <span class="src src-placeholder" title="Ranges are simulated, not NASA data">Simulated data</span>
+      </div>
+      <div class="hero" role="group" aria-label="Body model. Same information as the Body systems list.">
+        <aside class="legend" aria-label="Body systems"><h2 class="lg-h">Body systems · tap one</h2><div class="rlist" id="rlist"></div></aside>
+        <div class="halo"></div>
+        <div class="fig fallback" id="fallback" hidden>
+          <div class="photo"><img src="_local/zeno-full.png" alt="" draggable="false"></div>
+        </div>
+        <div class="viewer" id="viewer">
+          <canvas id="gl" aria-hidden="true"></canvas>
+          <svg class="leads" id="leads" aria-hidden="true"></svg>
+          <div id="pins"><div id="pinset"></div><div id="cos"></div></div>
+          <div class="v-hint" id="hint">Drag to turn. Tap an organ to look closer.</div>
+          <button class="v-reset" id="reset">Whole body</button>
+          <div class="v-load" id="vload">Loading body model</div>
+        </div>
+      </div>
+      <div class="lens" id="lens" role="group" aria-label="Hazard lens"></div>
+      <div class="bars" aria-label="Today at a glance">
+        <div class="bar" style="--v:68%;--c:var(--status-caution)"><span>Sleep, last 7 nights</span><b>5.1 h debt</b><i></i></div>
+        <div class="bar" style="--v:42%;--c:var(--status-nominal)"><span>Exercise blocks this week</span><b>3 of 6</b><i></i></div>
+        <div class="bar" style="--v:90%;--c:var(--status-watch)"><span>Baseline built</span><b>Day 6 of 7</b><i></i></div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="side">
+    <section class="card" aria-labelledby="fh"><h2 id="fh">What needs you now</h2><div id="flags"></div></section>
+    <section class="card detail" id="detail" aria-live="polite"></section>
+    <section class="card"><h2>Quick actions</h2>
+      <div class="actions"><button class="btn primary">Measure</button><button class="btn">Check-in</button><button class="btn">Ask</button><button class="btn">Send to ground</button></div>
+    </section>
+    <p class="honesty">Every range shows its source status. Nothing here is NASA data. No medication doses are shown anywhere.</p>
+  </aside>
+</div>
+
+<!-- A7 Guidance sheet -->
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh" aria-hidden="true">
+  <div class="sheet-top"><span class="chip s-caution">▲ Caution</span><button class="x" id="close" aria-label="Close guidance">Close</button></div>
+  <h2 id="sh">Resting heart rate is 14% above your baseline, two days running, with sleep debt.</h2>
+  <ol class="ladder" aria-label="Escalation ladder">
+    <li><b>Monitor</b>Keep routine</li><li class="cur"><b>Self-care</b>Do the kit action</li><li><b>Consult ground</b>Send a report</li><li><b>Urgent</b>Follow protocol</li>
+  </ol>
+  <p class="muted" style="font-size:14px">Moves up if the recheck stays high or you feel chest pain. Moves down after two normal readings.</p>
+  <div class="tth" aria-label="Time to help">
+    <div><small>Round trip</small><b class="mono">36 min</b></div><div><small>Next window</small><b class="mono">15:20 MET</b></div><div><small>Waiting is</small><b style="color:var(--status-nominal)">Safe</b></div>
+  </div>
+  <div style="display:grid;gap:var(--space-2)">
+    <div class="act"><div><b>Guided rest, 20 minutes</b><small>No kit item needed</small></div><span class="chip s-nominal">● Available</span></div>
+    <div class="act"><div><b>Pulse oximeter recheck</b><small>Kit: Bay 2, shelf B. Qty 1</small></div><span class="chip s-nominal">● In kit</span></div>
+    <div class="act off"><div><b>Blood pressure cuff</b><small>Not in kit. Fallback: manual pulse count for 60 s</small></div><span class="chip s-unknown">○ Missing</span></div>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn primary">Start action</button><button class="btn">Set recheck in 2 h</button><button class="btn">Send to ground</button>
+    <button class="btn" style="grid-column:1/-1">Ask why</button>
+  </div>
+</aside>
+
+<div class="mock" role="group" aria-label="Mock state">
+  <span>Mock state</span>
+  <button data-st="flagged" aria-pressed="true">Flagged</button><button data-st="nominal" aria-pressed="false">Nominal</button>
+  <button data-st="cold" aria-pressed="false">Cold start</button><button data-st="stale" aria-pressed="false">Stale</button>
+</div>
+
+<script>
+/* custom line icons, 24 grid, stroke = currentColor. Status shape differs per level so it never relies on colour. */
+const svg=(d,c='ico')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const GLYPH={
+  nominal:svg('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>','ico s'),
+  watch:svg('<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/>','ico s'),
+  caution:svg('<path d="M12 3.5 21.5 20h-19Z"/><path d="M12 10v4.5M12 17.2v.1"/>','ico s'),
+  urgent:svg('<path d="M8 2.5h8l5.5 5.5v8L16 21.5H8L2.5 16V8Z"/><path d="M12 7.5v6M12 16.5v.1"/>','ico s'),
+  unknown:svg('<circle cx="12" cy="12" r="9" stroke-dasharray="3 2.6"/><path d="M9.8 9.6a2.3 2.3 0 1 1 3.3 2c-.7.4-1.1.9-1.1 1.8M12 16.6v.1"/>','ico s'),
+};
+const ICON={
+  head:svg('<path d="M12 5.5a3 3 0 0 0-5.7 1.2A3 3 0 0 0 4 10.5a3 3 0 0 0 1.2 4.8A3 3 0 0 0 10 19a2 2 0 0 0 2-1.5Z"/><path d="M12 5.5a3 3 0 0 1 5.7 1.2 3 3 0 0 1 2.3 3.8 3 3 0 0 1-1.2 4.8A3 3 0 0 1 14 19a2 2 0 0 1-2-1.5"/><path d="M8.5 10.5c1 0 1.8.7 1.8 1.7M15.5 10.5c-1 0-1.8.7-1.8 1.7"/>'),
+  eyes:svg('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>'),
+  mind:svg('<path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.2 6.2 0 0 0 10 10Z"/><path d="M16 4v3M14.5 5.5h3"/>'),
+  lungs:svg('<path d="M12 3v8m0 0-2.5 2m2.5-2 2.5 2"/><path d="M9 7.5C6 8.5 4 12.5 4 16.5c0 2 1 3 2.8 3 1.7 0 2.2-1 2.2-3Z"/><path d="M15 7.5c3 1 5 5 5 9 0 2-1 3-2.8 3-1.7 0-2.2-1-2.2-3Z"/>'),
+  heart:svg('<path d="M12 20.5 4.6 13.4A5 5 0 0 1 12 6.6a5 5 0 0 1 7.4 6.8Z"/><path d="M4 12h4l1.5-2.5 3 5 1.5-2.5h6"/>'),
+  gut:svg('<path d="M7 3.5h8.5a3 3 0 0 1 0 6H8.5a3 3 0 0 0 0 6H15a2.5 2.5 0 0 1 0 5h-3.5"/>'),
+  immune:svg('<path d="M12 3 19 6v5.5c0 4.5-3 7.8-7 9.5-4-1.7-7-5-7-9.5V6Z"/><path d="M12 9v5.5M9.2 11.8h5.6"/>'),
+  skin:svg('<path d="M3 8.5c3-2 6 2 9 0s6-2 9 0M3 13.5c3-2 6 2 9 0s6-2 9 0"/><path d="M3 18.5h18"/>'),
+  muscles:svg('<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>'),
+  bones:svg('<path d="m8.5 8.5 7 7"/><path d="M8.5 8.5a2 2 0 1 0-2.8-2.8 2 2 0 1 0-1.5 3.5 2 2 0 0 0 4.3-.7ZM15.5 15.5a2 2 0 1 0 2.8 2.8 2 2 0 1 0 1.5-3.5 2 2 0 0 0-4.3.7Z"/>'),
+};
+const WORD={nominal:'Nominal',watch:'Watch',caution:'Caution',urgent:'Urgent',unknown:'Unknown'};
+const chip=s=>`<span class="chip s-${s}">${GLYPH[s]} ${WORD[s]}</span>`;
+
+const REG={
+  head:{n:'Head and brain',why:'Fluid shifts toward the head in microgravity. Mild fullness is expected.',h:['radiation','gravity']},
+  eyes:{n:'Eyes',why:'Pressure changes can alter vision over months. Quick vision checks catch drift early.',h:['gravity','radiation']},
+  mind:{n:'Mind and mood',why:'Isolation and long delays make sleep and mood worth tracking daily.',h:['isolation','distance']},
+  lungs:{n:'Lungs',why:'Cabin air and dust behave differently in a closed environment.',h:['closed-environment']},
+  heart:{n:'Heart and circulation',why:'Without gravity the heart works against less load. Resting rate is the daily signal.',h:['gravity']},
+  gut:{n:'Gut and nutrition',why:'Food variety and appetite shift on long missions.',h:['closed-environment','isolation']},
+  immune:{n:'Immune system',why:'Stress and radiation can quietly lower defences.',h:['radiation','closed-environment','isolation']},
+  skin:{n:'Skin',why:'Closed-environment hygiene and radiation exposure show up here first.',h:['radiation','closed-environment']},
+  muscles:{n:'Muscles',why:'Muscle loss is gradual without resistance exercise.',h:['gravity']},
+  bones:{n:'Bones',why:'Bone density drops without load. Exercise blocks protect it.',h:['gravity']}
+};
+const HAZ=[['radiation','Radiation','--hazard-radiation'],['isolation','Isolation and confinement','--hazard-isolation'],['distance','Distance from Earth','--hazard-distance'],['gravity','Gravity fields','--hazard-gravity'],['closed-environment','Closed environment','--hazard-closed-environment']];
+
+const ALL=(s)=>Object.fromEntries(Object.keys(REG).map(k=>[k,s]));
+const STATES={
+  flagged:{overall:'watch',sub:'Everything else is within your normal.',bell:2,
+    st:{...ALL('nominal'),heart:'caution',mind:'watch',eyes:'unknown'},
+    meta:{heart:'Resting HR 74 bpm · baseline 65 · 2 h ago',mind:'Sleep debt 5.1 h this week · last night',eyes:'Not checked in 9 days'},
+    flags:[{r:'heart',s:'caution',t:'Resting heart rate is up 14%',next:'Recheck in 2 h. Guided rest first.',go:true},{r:'mind',s:'watch',t:'Sleep debt building this week',next:'Aim for an earlier wind-down tonight.'}]},
+  nominal:{overall:'nominal',sub:'All systems within your normal. Nothing needs you right now.',bell:0,
+    st:ALL('nominal'),meta:{},flags:[]},
+  cold:{overall:'unknown',sub:'Building your baseline: day 3 of 7. Ranges are shown as general guidance until then.',bell:0,
+    st:{...ALL('unknown'),heart:'watch'},meta:{heart:'First readings, baseline still forming'},
+    flags:[{r:'heart',s:'unknown',t:'Baseline in progress, day 3 of 7',next:'Take your morning vitals to speed it up.'}]},
+  stale:{overall:'unknown',sub:'Some readings are old, so those systems are shown as unknown.',bell:1,
+    st:{...ALL('unknown'),lungs:'nominal',skin:'nominal',head:'nominal'},stale:true,meta:{heart:'Last measured 26 h ago',bones:'Last measured 26 h ago'},
+    flags:[{r:'heart',s:'unknown',t:'Heart data is 26 hours old',next:'Measure now to refresh your status.'}]}
+};
+
+/* Stylised figure. Hotspot shapes are placeholders for real art. */
+const SH={
+  muscles:'<rect x="56" y="104" width="22" height="128" rx="11"/><rect x="162" y="104" width="22" height="128" rx="11"/><rect x="88" y="250" width="30" height="110" rx="15"/><rect x="122" y="250" width="30" height="110" rx="15"/>',
+  bones:'<rect x="117" y="98" width="6" height="140" rx="3"/><ellipse cx="120" cy="244" rx="30" ry="12"/><rect x="100" y="360" width="8" height="120" rx="4"/><rect x="132" y="360" width="8" height="120" rx="4"/>',
+  skin:'<rect x="84" y="92" width="72" height="156" rx="28"/><rect x="88" y="240" width="64" height="250" rx="22"/>',
+  gut:'<rect x="96" y="196" width="48" height="42" rx="16"/>',
+  lungs:'<path d="M99 112c-9 4-13 24-12 40 1 10 9 12 16 8 6-3 8-14 7-30-1-11-4-20-11-18z"/><path d="M141 112c9 4 13 24 12 40-1 10-9 12-16 8-6-3-8-14-7-30 1-11 4-20 11-18z"/>',
+  heart:'<path d="M120 178c-14-9-18-20-12-27 5-6 12-4 12 3 0-7 7-9 12-3 6 7 2 18-12 27z"/>',
+  immune:'<circle cx="120" cy="96" r="5"/><circle cx="92" cy="122" r="5"/><circle cx="148" cy="122" r="5"/><circle cx="108" cy="262" r="5"/><circle cx="132" cy="262" r="5"/>',
+  head:'<ellipse cx="120" cy="50" rx="33" ry="40"/>',
+  mind:'<ellipse cx="120" cy="40" rx="21" ry="16"/>',
+  eyes:'<circle cx="109" cy="62" r="5.5"/><circle cx="131" cy="62" r="5.5"/>'
+};
+const ORDER=['skin','muscles','bones','head','mind','eyes','lungs','heart','gut','immune'];
+const BASE='<g class="base"><ellipse cx="120" cy="50" rx="35" ry="42"/><rect x="108" y="84" width="24" height="16" rx="6"/><rect x="82" y="92" width="76" height="160" rx="30"/><rect x="54" y="102" width="26" height="134" rx="13"/><rect x="160" y="102" width="26" height="134" rx="13"/><rect x="86" y="240" width="34" height="252" rx="17"/><rect x="120" y="240" width="34" height="252" rx="17"/></g>';
+
+/* Pin positions as % of the cropped astronaut photo. Placeholder art: swap for a Blender render, keep the same x/y map. */
+const POS={
+  mind:{x:45,y:9,side:'r'},head:{x:45,y:17.5,side:'r'},eyes:{x:45,y:25,side:'l'},
+  immune:{x:27,y:32.7,side:'l'},lungs:{x:37.5,y:37.5,side:'l'},heart:{x:49,y:42.3,side:'r'},
+  skin:{x:73,y:46.2,side:'r'},muscles:{x:18,y:50,side:'l'},gut:{x:44,y:53.8,side:'l'},bones:{x:41,y:78.8,side:'r'}
+};
+const HEAD={flagged:'Two things worth a look',nominal:'All clear',cold:'Learning your normal',stale:'Some readings are old'};
+Object.keys(HEAD).forEach(k=>STATES[k].headline=HEAD[k]);
+let state='flagged',lens=null,sel='heart';
+
+function render(){
+  const S=STATES[state];
+  const el=(id)=>document.getElementById(id);
+  el('overall').className='chip s-'+S.overall;el('overall').innerHTML=GLYPH[S.overall]+' '+WORD[S.overall];
+  el('sub').textContent=S.sub;
+  const b=el('bellN');b.textContent=S.bell;b.style.display=S.bell?'':'none';
+
+  const lit=lens?Object.keys(REG).filter(k=>REG[k].h.includes(lens)):null;
+  const dim=k=>lit&&!lit.includes(k);
+
+  el('h').textContent=S.headline;
+  /* 3D viewer owns pins + callouts; it reads this snapshot. Status still comes from the (mock) engine output. */
+  window.AHC={st:S.st,flags:S.flags,sel,lit,state,stale:!!S.stale,
+    pin:k=>`<button class="pin s-${S.st[k]} ${S.stale&&S.st[k]==='unknown'?'stale':''} ${dim(k)?'dim':''} ${lit&&!dim(k)?'lit':''} ${k===sel?'sel':''}" style="--c:var(--status-${S.st[k]})" data-r="${k}" aria-pressed="${k===sel}" aria-label="${REG[k].n}: ${WORD[S.st[k]]}"><i></i></button>`,
+    callout:f=>`<button class="callout" style="--c:var(--status-${f.s})" data-r="${f.r}" data-go="${f.go?1:0}">${chip(f.s)}<b>${f.t}</b></button>`};
+  document.dispatchEvent(new Event('ahc:render'));
+
+  el('rlist').innerHTML=Object.keys(REG).map(k=>{
+    const s=S.st[k];
+    return `<button class="rrow s-${s} ${dim(k)?'dim':''}" data-r="${k}" aria-pressed="${k===sel}"><span class="rico">${ICON[k]}</span><span><span class="n">${REG[k].n}</span>${S.meta[k]?`<br><span class="m">${S.meta[k]}</span>`:''}</span>${chip(s)}</button>`;
+  }).join('');
+
+  el('flags').innerHTML=S.flags.length?S.flags.map((f,i)=>`<button class="flag s-${f.s}" data-go="${f.go?1:0}" data-r="${f.r}"><span class="row">${chip(f.s)}<span class="muted" style="font-size:13px">${REG[f.r].n}</span></span><b>${f.t}</b><span class="next">${f.next}${f.go?' · Open guidance':''}</span></button>`).join('')
+    :`<div class="calm">${chip('nominal')}<p>Calm. Nothing needs attention.</p></div>`;
+
+  const s=S.st[sel],R=REG[sel];
+  el('detail').innerHTML=`<h2>Selected region</h2><h3>${R.n} ${chip(s)}</h3><p>${R.why}</p>
+    <div class="meta"><span class="src src-adapted">adapted range</span><span class="mono">${S.meta[sel]||'Within your baseline'}</span></div>
+    <div class="actions" style="margin-top:var(--space-3)"><button class="btn">Measure now</button><button class="btn">What should I do?</button></div>`;
+
+  el('lens').innerHTML=HAZ.map(([k,l,v])=>`<button style="--h:var(${v})" aria-pressed="${lens===k}" data-l="${k}">${l}</button>`).join('');
+  document.querySelectorAll('.mock button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.st===state));
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-r],[data-l],[data-st]');if(!t)return;
+  if(t.dataset.st){state=t.dataset.st;sel=Object.keys(REG).find(k=>STATES[state].st[k]!=='nominal')||'heart';}
+  else if(t.dataset.l){lens=lens===t.dataset.l?null:t.dataset.l;}
+  else if(t.dataset.r){sel=t.dataset.r;if(t.dataset.go==='1')openSheet();}
+  render();
+});
+window.ahcSelect=k=>{sel=k;render();};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeSheet();
+});
+const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim');
+function openSheet(){sheet.classList.add('open');scrim.classList.add('open');sheet.setAttribute('aria-hidden','false');document.getElementById('close').focus()}
+function closeSheet(){sheet.classList.remove('open');scrim.classList.remove('open');sheet.setAttribute('aria-hidden','true')}
+document.getElementById('close').onclick=closeSheet;scrim.onclick=closeSheet;
+render();
+</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<!-- ponytail: CDN for the mock only; the app bundles three + the GLB (offline-first). -->
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const $=id=>document.getElementById(id);
+const viewer=$('viewer'),canvas=$('gl'),pinsEl=$('pins'),leads=$('leads');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const STATUS=s=>new THREE.Color(css('--status-'+s));
+
+function fallback(){viewer.hidden=true;$('fallback').hidden=false;}
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}catch(e){fallback();throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(30,1,0.01,100);
+const controls=new OrbitControls(camera,canvas);
+Object.assign(controls,{enableDamping:true,dampingFactor:.08,enablePan:false,enableZoom:false,rotateSpeed:.7,minPolarAngle:Math.PI*.14,maxPolarAngle:Math.PI*.86});
+
+/* X-ray material: lambert core + fresnel rim. One shader, per-region uniforms. */
+const VS=`varying vec3 vN;varying vec3 vV;varying float vY;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vY=(modelMatrix*vec4(position,1.)).y;vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`;
+/* uSel = selected (shine: hot rim + light sweep up the organ), uHov = hover lift */
+const FS=`uniform vec3 uC;uniform float uBody,uRim,uA,uRimA,uGlow,uSel,uHov,uT,uY0,uY1;varying vec3 vN;varying vec3 vV;varying float vY;
+void main(){vec3 n=normalize(vN);if(!gl_FrontFacing)n=-n;float f=pow(1.-abs(dot(n,vV)),2.2);
+float l=.35+.65*max(dot(n,normalize(vec3(.4,.7,.6))),0.);
+float yy=(vY-uY0)/max(uY1-uY0,1e-4);float band=exp(-pow((yy-fract(uT*.45)*1.4+.2)*9.,2.));
+vec3 c=uC*(uBody*l+uGlow)+uC*f*uRim;
+c+=uC*(uHov*.3+uSel*(.35+f*1.6+band*1.1))+vec3(1.)*uSel*band*.35;
+gl_FragColor=vec4(c,clamp(uA+f*uRimA+uSel*(.12+f*.35+band*.2)+uHov*.08,0.,1.));}`;
+/* layer look: shells are faint rims, organs are solid-ish and lit */
+const LOOK={
+  skin:{body:.0,rim:1.1,a:.0,rimA:.32,order:6,shell:1},
+  muscles:{body:.15,rim:.7,a:.015,rimA:.12,order:5,shell:1},
+  bones:{body:.55,rim:.6,a:.08,rimA:.3,order:1,shell:1},
+  head:{body:.55,rim:.6,a:.08,rimA:.32,order:1,shell:1},
+};
+const ORGAN={body:.9,rim:.8,a:.82,rimA:.18,order:3};
+const NEUTRAL=new THREE.Color('#9aa3ad');
+const PRIORITY=['eyes','heart','lungs','mind','immune','gut','head','bones','muscles','skin'];
+
+const regions={};let bodyBox,bodySize,home={};
+/* distance that fits head to feet (and arm span) in the viewer, with a margin. Depends on aspect, so it reruns on resize. */
+function fitDist(){const t=Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),m=1.04;
+  /* height only: the model's box is far wider than the visible body, so a width fit shrank it on phones */
+  return bodySize.y*m/2/t*(camera.aspect<.8?1.12:1);} /* phones: a touch more air */
+new GLTFLoader().load('assets/body.glb',g=>{
+  const root=g.scene;
+  root.traverse(o=>{
+    if(!o.isMesh)return;
+    const k=o.name.replace(/\.\d+$/,'');const L=LOOK[k]||ORGAN;
+    o.material=new THREE.ShaderMaterial({vertexShader:VS,fragmentShader:FS,transparent:true,depthWrite:!L.shell,side:L.shell?THREE.DoubleSide:THREE.FrontSide,
+      blending:L.shell?THREE.AdditiveBlending:THREE.NormalBlending,
+      uniforms:{uC:{value:new THREE.Color()},uBody:{value:L.body},uRim:{value:L.rim},uA:{value:L.a},uRimA:{value:L.rimA},uGlow:{value:0},uSel:{value:0},uHov:{value:0},uT:{value:0},uY0:{value:0},uY1:{value:1}}});
+    o.renderOrder=L.order;o.geometry.computeBoundingBox();
+    regions[k]={mesh:o,look:L,fade:1,color:new THREE.Color().copy(NEUTRAL)};
+  });
+  scene.add(root);
+  /* centre + frame */
+  bodyBox=new THREE.Box3().setFromObject(root);
+  /* turn around the spine, not the bounding box: arms and hands make the box lopsided, so the body swung off-centre */
+  const c=bodyBox.getCenter(new THREE.Vector3()),spine=new THREE.Box3().setFromObject(regions.head.mesh).getCenter(new THREE.Vector3());
+  c.x=spine.x;c.z=spine.z;root.position.sub(c);bodyBox.translate(c.clone().negate());
+  const s=bodyBox.getSize(new THREE.Vector3());root.updateMatrixWorld(true);
+  for(const k in regions){const R=regions[k],b=new THREE.Box3().setFromObject(R.mesh);R.center=b.getCenter(new THREE.Vector3());R.size=b.getSize(new THREE.Vector3()).length();
+    R.mesh.material.uniforms.uY0.value=b.min.y;R.mesh.material.uniforms.uY1.value=b.max.y;R.sel=0;R.hov=0;}
+  /* anchors for whole-body layers, so their pins do not stack on the chest */
+  /* offsets in body heights from each layer's own centre: upper arm, thigh, shin */
+  const at=(k,x,y)=>regions[k].center.clone().add(new THREE.Vector3(s.y*x,s.y*y,0));
+  regions.skin.anchor=at('skin',.11,.14);regions.muscles.anchor=at('muscles',-.055,-.16);regions.bones.anchor=at('bones',.05,-.33);
+  /* snap whole-body anchors onto the actual surface so pins sit on the limb, not in the air */
+  const snap=(R,p)=>{const a=R.mesh.geometry.attributes.position,t=new THREE.Vector3(),o=p.clone();let best=Infinity;
+    for(let i=0;i<a.count;i+=5){t.fromBufferAttribute(a,i).applyMatrix4(R.mesh.matrixWorld);const d=t.distanceToSquared(p);if(d<best){best=d;o.copy(t);}}return o;};
+  for(const k of ['skin','muscles','bones'])regions[k].anchor=snap(regions[k],regions[k].anchor);
+  for(const k in regions)regions[k].anchor??=regions[k].center.clone();
+  bodySize=s;home={target:new THREE.Vector3(0,0,0),dist:fitDist()};
+  camera.position.set(0,home.target.y,home.dist);controls.target.copy(home.target);
+  goal={target:home.target.clone(),dist:home.dist};
+  $('vload').classList.add('done');sync();
+},undefined,()=>fallback());
+
+/* focus: critically damped approach to a goal target + distance (Apple: damping 1, response ~.4s) */
+let goal=null,lastSel=null,lastState=null,focused=null,hovered=null,pressed=null,lastCo=null,dragging=false;
+function focus(k){
+  if(!regions[k])return;const R=regions[k];focused=k;
+  goal={target:R.center.clone(),dist:Math.max(R.size*1.7,home.dist*.32)};$('reset').classList.add('on');
+}
+function unfocus(){focused=null;goal={target:home.target.clone(),dist:home.dist};$('reset').classList.remove('on');}
+/* tapping the already-selected pin or callout still flies to it */
+pinsEl.addEventListener('click',e=>{const t=e.target.closest('[data-r]');if(t&&t.dataset.r===window.AHC?.sel)focus(t.dataset.r);});
+$('reset').onclick=e=>{e.stopPropagation();unfocus();};
+controls.addEventListener('start',()=>{$('hint').style.opacity=0;});
+
+/* sync from page state */
+function sync(){
+  const A=window.AHC;if(!A||!bodyBox)return;
+  for(const k in regions){
+    const R=regions[k],s=A.st[k];
+    /* calm by default: nominal is near-silver, only what needs attention takes full colour */
+    R.target=(s==='nominal'?NEUTRAL.clone().lerp(STATUS(s),R.look.shell?.06:.22):STATUS(s));
+    R.hot=s==='caution'||s==='urgent'||s==='watch';
+    R.fadeGoal=A.lit?(A.lit.includes(k)?1:.12):1;
+  }
+  $('pinset').innerHTML=Object.keys(regions).map(A.pin).join('');
+  /* rebuild callouts only when they change, so they grow in once instead of on every tap */
+  const co=A.flags.map(A.callout).join('');if(co!==lastCo){lastCo=co;$('cos').innerHTML=co;}
+  if(A.state!==lastState){lastState=A.state;lastSel=A.sel;unfocus();}
+  else if(A.sel!==lastSel){lastSel=A.sel;focus(A.sel);}
+}
+document.addEventListener('ahc:render',sync);
+
+/* tap to pick an organ (drag ≠ tap: 6px hysteresis) */
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
+/* feedback on press, commit on release (Apple: respond on pointer-down) */
+canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];if(bodyBox){const k=pick(e);pressed=k&&k!=='skin'?k:null;}});
+canvas.addEventListener('pointermove',e=>{if(pressed&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)pressed=null;});
+canvas.addEventListener('pointercancel',()=>{pressed=null;});
+canvas.addEventListener('pointerup',e=>{
+  pressed=null;
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
+  const k=pick(e);
+  if(k&&k!=='skin'){k===window.AHC?.sel?focus(k):window.ahcSelect(k);}else unfocus();
+});
+function pick(e){
+  const r=canvas.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(Object.values(regions).map(R=>R.mesh),false).map(h=>h.object.name.replace(/\.\d+$/,''));
+  return PRIORITY.find(p=>hits.includes(p)&&!['skin','muscles'].includes(p))||hits[0];
+}
+/* hover: one raycast per frame at most */
+let hovEv=null;canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!e.buttons)hovEv=e;});
+canvas.addEventListener('pointerleave',()=>{hovered=null;canvas.style.cursor='';});
+
+/* resize */
+new ResizeObserver(()=>{const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  if(bodySize){home.dist=fitDist();if(!focused&&goal)goal.dist=home.dist;}}).observe(viewer);
+
+/* frame loop: springs, pulse, projection of pins and callouts */
+const v=new THREE.Vector3(),clock=new THREE.Clock();
+function tick(){
+  const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime,k=reduce?1:1-Math.exp(-dt/.11);
+  if(goal&&bodyBox){
+    controls.target.lerp(goal.target,k);
+    const dir=camera.position.clone().sub(controls.target).normalize();
+    const d=camera.position.distanceTo(controls.target);
+    camera.position.copy(controls.target).addScaledVector(dir,d+(goal.dist-d)*k);
+  }
+  if(!reduce&&!goal?.moved&&bodyBox&&!focused)controls.autoRotate=true,controls.autoRotateSpeed=.35;
+  controls.update();
+  /* rubber-band: hard limits are wide, the soft range springs back once the drag lets go */
+  if(bodyBox&&!dragging){const p=controls.getPolarAngle(),lo=Math.PI*.3,hi=Math.PI*.7,c=Math.min(hi,Math.max(lo,p));
+    if(Math.abs(c-p)>1e-4){const off=camera.position.clone().sub(controls.target),sp=new THREE.Spherical().setFromVector3(off);
+      sp.phi=p+(c-p)*(reduce?1:1-Math.exp(-dt/.12));camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(sp));}}
+  if(hovEv&&bodyBox){const h=pick(hovEv);hovered=h&&h!=='skin'?h:null;canvas.style.cursor=hovered?'pointer':'';hovEv=null;}
+  const sel=window.AHC?.sel;
+  for(const key in regions){
+    const R=regions[key],u=R.mesh.material.uniforms;
+    if(R.target)R.color.lerp(R.target,k);
+    /* focus emphasis: everything else steps back so the selected organ reads */
+    const back=focused&&key!==focused?(R.look.shell?.45:.28):1;
+    R.fade+=((R.fadeGoal??1)*back-R.fade)*k;
+    R.sel+=((key===sel?1:0)-R.sel)*k;R.hov+=((key===pressed?2.2:key===hovered?1:0)-R.hov)*(key===pressed?1:k);
+    u.uC.value.copy(R.color).multiplyScalar(R.fade);
+    u.uSel.value=R.sel;u.uHov.value=R.hov;u.uT.value=reduce?.35:t;
+    u.uGlow.value=R.hot&&!reduce?.12+.12*(.5+.5*Math.sin(t*2.4)):(R.hot?.18:0);
+  }
+  renderer.render(scene,camera);
+  /* project pins */
+  if(bodyBox&&window.AHC){
+    const w=viewer.clientWidth,h=viewer.clientHeight,pos={};
+    pinsEl.querySelectorAll('.pin').forEach(p=>{
+      const R=regions[p.dataset.r];v.copy(R.anchor).project(camera);
+      const x=(v.x*.5+.5)*w,y=(-v.y*.5+.5)*h;pos[p.dataset.r]=[x,y];
+      p.style.transform=`translate(${x}px,${y}px)`;p.style.margin='-24px 0 0 -24px';p.style.position='absolute';
+    });
+    let lines='';const used={l:[],r:[]};
+    pinsEl.querySelectorAll('.callout').forEach((c,i)=>{
+      const P=pos[c.dataset.r];if(!P)return;const side=i%2?'l':'r'; /* fixed sides: callouts must not jump while the body turns */
+      let y=Math.max(44,Math.min(h-70,P[1]-28)); /* 44: clear of the hint and Whole body */for(const u of used[side])if(Math.abs(u-y)<76)y=u+76;used[side].push(y);
+      const cw=c.offsetWidth,x=side==='l'?0:w-cw;c.style.transform=`translate(${x}px,${y}px)`;c.style.transformOrigin=side==='l'?'100% 50%':'0 50%';
+      const col=getComputedStyle(c).getPropertyValue('--c');
+      lines+=`<line x1="${P[0]}" y1="${P[1]}" x2="${side==='l'?cw:w-cw}" y2="${y+28}" stroke="${col}"/>`;
+    });
+    leads.innerHTML=lines;
+  }
+  requestAnimationFrame(tick);
+}
+controls.addEventListener('start',()=>{dragging=true;controls.autoRotate=false;if(goal)goal.moved=true;});
+controls.addEventListener('end',()=>{dragging=false;});
+tick();
+</script>
+</body>
+</html>
