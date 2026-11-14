@@ -4,7 +4,7 @@
 #![allow(dead_code)] // the whole token set is mirrored, not only what is used today
 
 use ahc_core::{SourceStatus, Status};
-use eframe::egui::{Color32, Context, Stroke, TextStyle, Visuals};
+use eframe::egui::{Color32, Context, CornerRadius, Stroke, TextStyle, Visuals};
 
 // Status: meaning is fixed. Always shown with icon + word (docs/contract.md section 2).
 pub const STATUS_NOMINAL: Color32 = Color32::from_rgb(0x3e, 0xcf, 0x8e);
@@ -14,19 +14,27 @@ pub const STATUS_URGENT: Color32 = Color32::from_rgb(0xf0, 0x44, 0x5a);
 pub const STATUS_UNKNOWN: Color32 = Color32::from_rgb(0x8a, 0x93, 0xa6);
 
 // Surfaces
-pub const BG: Color32 = Color32::from_rgb(0x0b, 0x0f, 0x17);
-pub const SURFACE: Color32 = Color32::from_rgb(0x12, 0x18, 0x26);
-pub const SURFACE_RAISED: Color32 = Color32::from_rgb(0x1a, 0x22, 0x33);
-pub const BORDER: Color32 = Color32::from_rgb(0x26, 0x30, 0x46);
+pub const BG: Color32 = Color32::from_rgb(0x00, 0x00, 0x00);
+pub const SURFACE: Color32 = Color32::from_rgb(0x05, 0x06, 0x07);
+pub const SURFACE_RAISED: Color32 = Color32::from_rgb(0x0d, 0x0f, 0x12);
+pub const SURFACE_SUNKEN: Color32 = Color32::from_rgb(0x0a, 0x0b, 0x0d);
+pub const SURFACE_HOVER: Color32 = Color32::from_rgb(0x15, 0x18, 0x1c);
+pub const STAGE_GLOW: Color32 = Color32::from_rgb(0x14, 0x17, 0x1b);
+pub const BORDER: Color32 = Color32::from_rgb(0x23, 0x26, 0x2b);
+pub const BORDER_STRONG: Color32 = Color32::from_rgb(0x45, 0x4a, 0x52);
 
 // Text
-pub const TEXT: Color32 = Color32::from_rgb(0xe6, 0xea, 0xf2);
-pub const TEXT_MUTED: Color32 = Color32::from_rgb(0x8a, 0x93, 0xa6);
-pub const TEXT_ON_STATUS: Color32 = Color32::from_rgb(0x0b, 0x0f, 0x17);
+pub const TEXT: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+pub const TEXT_MUTED: Color32 = Color32::from_rgb(0x8b, 0x90, 0x97);
+pub const TEXT_ON_STATUS: Color32 = Color32::from_rgb(0x00, 0x00, 0x00);
 
 // Brand / interactive
-pub const ACCENT: Color32 = Color32::from_rgb(0x7c, 0x9c, 0xff);
-pub const FOCUS_RING: Color32 = Color32::from_rgb(0xa9, 0xbc, 0xff);
+pub const ACCENT: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0xd6, 0xd8, 0xdc);
+pub const FOCUS_RING: Color32 = Color32::from_rgb(0xf2, 0xf3, 0xf5);
+
+// 3D body: nominal organs stay near-silver
+pub const ORGAN_NEUTRAL: Color32 = Color32::from_rgb(0x9a, 0xa3, 0xad);
 
 // Data honesty chips
 pub const SOURCE_SOURCED: Color32 = Color32::from_rgb(0x3e, 0xcf, 0x8e);
@@ -41,9 +49,10 @@ pub const HAZARD_GRAVITY: Color32 = Color32::from_rgb(0xa3, 0xe6, 0x35);
 pub const HAZARD_CLOSED_ENVIRONMENT: Color32 = Color32::from_rgb(0xfd, 0xa4, 0xaf);
 
 // Shape, space, type (points; the CSS px values map 1:1)
-pub const RADIUS_SM: f32 = 6.0;
-pub const RADIUS_MD: f32 = 12.0;
-pub const RADIUS_LG: f32 = 20.0;
+pub const RADIUS_SM: f32 = 2.0;
+pub const RADIUS_MD: f32 = 4.0;
+pub const RADIUS_LG: f32 = 6.0;
+pub const RADIUS_PILL: f32 = 999.0;
 pub const SPACE_1: f32 = 4.0;
 pub const SPACE_2: f32 = 8.0;
 pub const SPACE_3: f32 = 12.0;
@@ -91,12 +100,29 @@ pub fn apply(ctx: &Context) {
             }
         }
         s.spacing.item_spacing.y = SPACE_2;
+        s.spacing.button_padding = eframe::egui::vec2(SPACE_3, SPACE_1 + 2.0);
     });
     let mut v = Visuals::dark();
     v.panel_fill = BG;
     v.window_fill = SURFACE;
     v.extreme_bg_color = BG;
-    v.faint_bg_color = SURFACE;
+    v.faint_bg_color = SURFACE_SUNKEN;
+    let r = CornerRadius::same(RADIUS_SM as u8);
+    for (w, fill) in [
+        (&mut v.widgets.inactive, SURFACE_RAISED),
+        (&mut v.widgets.hovered, SURFACE_HOVER),
+        (&mut v.widgets.active, SURFACE_HOVER),
+        (&mut v.widgets.open, SURFACE_HOVER),
+    ] {
+        w.corner_radius = r;
+        w.bg_fill = fill;
+        w.weak_bg_fill = fill;
+    }
+    v.widgets.inactive.bg_stroke = Stroke::new(1.0_f32, BORDER);
+    v.widgets.hovered.bg_stroke = Stroke::new(1.0_f32, BORDER_STRONG);
+    v.widgets.active.bg_stroke = Stroke::new(1.0_f32, ACCENT);
+    v.widgets.noninteractive.corner_radius = r;
+    v.window_corner_radius = CornerRadius::same(RADIUS_MD as u8);
     v.override_text_color = Some(TEXT);
     v.hyperlink_color = ACCENT;
     // Keyboard-first: egui draws the keyboard focus ring with `selection.stroke`.
@@ -123,6 +149,12 @@ mod tests {
             ("bg", BG),
             ("surface", SURFACE),
             ("surface-raised", SURFACE_RAISED),
+            ("surface-sunken", SURFACE_SUNKEN),
+            ("surface-hover", SURFACE_HOVER),
+            ("stage-glow", STAGE_GLOW),
+            ("border-strong", BORDER_STRONG),
+            ("organ-neutral", ORGAN_NEUTRAL),
+            ("accent-hover", ACCENT_HOVER),
             ("border", BORDER),
             ("text", TEXT),
             ("text-muted", TEXT_MUTED),
@@ -146,6 +178,7 @@ mod tests {
                 ("radius-sm", RADIUS_SM),
                 ("radius-md", RADIUS_MD),
                 ("radius-lg", RADIUS_LG),
+                ("radius-pill", RADIUS_PILL),
                 ("space-1", SPACE_1),
                 ("space-2", SPACE_2),
                 ("space-3", SPACE_3),

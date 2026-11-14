@@ -4,14 +4,13 @@
 //! display by `board.rs`.
 mod board;
 mod entry;
+mod icons;
 mod storage;
 mod theme;
 
 use ahc_core::{assess, demo, registry, AssessInput, Event, Indicator, KitItem, Status};
 use board::{Board, FlagCard, LADDER};
-use eframe::egui::{
-    self, pos2, Color32, CornerRadius, Frame, Label, Margin, RichText, Sense, Shape, Stroke, Vec2,
-};
+use eframe::egui::{self, Color32, CornerRadius, Frame, Label, Margin, RichText, Stroke};
 use storage::{Changes, Settings};
 
 /// How often the board is re-assessed while nothing changes, so staleness and
@@ -169,7 +168,7 @@ impl App {
         }
 
         ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new("Quick entry").heading().strong());
+            section_heading(ui, None, "Quick entry");
             ui.add_space(theme::SPACE_2);
             ui.label(
                 RichText::new("Up/Down: indicator · Enter: log · Esc: clear · /: jump here")
@@ -182,6 +181,7 @@ impl App {
             self.draft.selected = self.draft.selected.min(len - 1);
             let picked_before = self.draft.selected;
             let selected = &self.registry[picked_before];
+            icons::indicator(ui, &selected.id, theme::TEXT);
             egui::ComboBox::from_id_salt("quick_entry_indicator")
                 .width(240.0)
                 .selected_text(&selected.name)
@@ -296,55 +296,33 @@ impl App {
     }
 }
 
-/// Draws the status icon as a shape: the default font has no ● ◐ ▲ ◆ glyphs.
-fn status_icon(ui: &mut egui::Ui, s: Status, color: Color32) {
-    let (rect, _) = ui.allocate_exact_size(Vec2::splat(16.0), Sense::hover());
-    let (c, r) = (rect.center(), 6.5_f32);
-    let p = ui.painter();
-    let stroke = Stroke::new(2.0_f32, color);
-    match s {
-        Status::Nominal => {
-            p.circle_filled(c, r, color);
-        }
-        Status::Watch => {
-            p.circle_stroke(c, r, stroke);
-            let arc = (0..=12)
-                .map(|i| {
-                    let a = -std::f32::consts::FRAC_PI_2 + std::f32::consts::PI * i as f32 / 12.0;
-                    pos2(c.x + r * a.cos(), c.y + r * a.sin())
-                })
-                .collect();
-            p.add(Shape::convex_polygon(arc, color, Stroke::NONE));
-        }
-        Status::Caution => {
-            let pts = vec![
-                pos2(c.x, c.y - r),
-                pos2(c.x + r, c.y + r),
-                pos2(c.x - r, c.y + r),
-            ];
-            p.add(Shape::convex_polygon(pts, color, Stroke::NONE));
-        }
-        Status::Urgent => {
-            let pts = vec![
-                pos2(c.x, c.y - r),
-                pos2(c.x + r, c.y),
-                pos2(c.x, c.y + r),
-                pos2(c.x - r, c.y),
-            ];
-            p.add(Shape::convex_polygon(pts, color, Stroke::NONE));
-        }
-        Status::Unknown => {
-            p.circle_stroke(c, r, stroke);
-        }
-    }
-}
-
-/// Colour + icon + word, the only way a status is ever shown.
+/// Outlined chip: status colour border + text + icon, then the word (never colour alone).
 fn status_badge(ui: &mut egui::Ui, s: Status, size: f32) {
     let (c, _, word) = theme::status_look(s);
+    Frame::new()
+        .stroke(Stroke::new(1.0_f32, c))
+        .corner_radius(CornerRadius::same(theme::RADIUS_SM as u8))
+        .inner_margin(Margin::symmetric(theme::SPACE_2 as i8, 2))
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                icons::status(ui, s, c);
+                ui.label(RichText::new(word).color(c).strong().size(size));
+            });
+        });
+}
+
+/// Uppercase small heading with an optional icon (cockpit look).
+fn section_heading(ui: &mut egui::Ui, icon: Option<&str>, text: &str) {
     ui.horizontal(|ui| {
-        status_icon(ui, s, c);
-        ui.label(RichText::new(word).color(c).strong().size(size));
+        if let Some(id) = icon {
+            icons::indicator(ui, id, theme::TEXT_MUTED);
+        }
+        ui.label(
+            RichText::new(text.to_uppercase())
+                .color(theme::TEXT_MUTED)
+                .strong()
+                .size(13.0),
+        );
     });
 }
 
@@ -421,7 +399,7 @@ impl eframe::App for App {
             .frame(
                 Frame::new()
                     .fill(theme::SURFACE_RAISED)
-                    .stroke(Stroke::new(2.0_f32, theme::ACCENT))
+                    .stroke(Stroke::new(1.0_f32, theme::BORDER_STRONG))
                     .inner_margin(Margin::symmetric(
                         theme::SPACE_4 as i8,
                         theme::SPACE_3 as i8,
@@ -439,10 +417,13 @@ impl eframe::App for App {
                     .wrap(),
                 );
                 ui.horizontal_wrapped(|ui| {
-                    ui.label(format!(
-                        "Mission day {} · MET {} · [{}] · Comms: {}",
-                        b.mission_day, b.met, b.environment, b.comms
-                    ));
+                    ui.label(
+                        RichText::new(format!(
+                            "Mission day {} · MET {} · [{}] · Comms: {}",
+                            b.mission_day, b.met, b.environment, b.comms
+                        ))
+                        .monospace(),
+                    );
                 });
                 ui.horizontal(|ui| {
                     status_badge(ui, b.overall, 20.0);
@@ -477,7 +458,7 @@ impl eframe::App for App {
             .show(ctx, |ui| {
                 // Both directions: the table is wider than the minimum window width.
                 egui::ScrollArea::both().show(ui, |ui| {
-                    ui.heading("Active flags");
+                    section_heading(ui, None, "Active flags");
                     if b.flags.is_empty() {
                         ui.label(RichText::new("No active flags.").color(theme::TEXT_MUTED));
                     }
@@ -495,7 +476,7 @@ impl eframe::App for App {
                     }
 
                     ui.add_space(theme::SPACE_4);
-                    ui.heading("Indicators");
+                    section_heading(ui, None, "Indicators");
                     egui::Grid::new("board")
                         .striped(true)
                         .num_columns(6)
@@ -510,16 +491,24 @@ impl eframe::App for App {
                                 "Source",
                                 "Last measured",
                             ] {
-                                ui.label(RichText::new(h).color(theme::TEXT_MUTED).strong());
+                                ui.label(
+                                    RichText::new(h.to_uppercase())
+                                        .color(theme::TEXT_MUTED)
+                                        .strong()
+                                        .size(12.0),
+                                );
                             }
                             ui.end_row();
                             for r in &b.rows {
-                                ui.label(&r.name);
-                                ui.label(&r.value);
+                                ui.horizontal(|ui| {
+                                    icons::indicator(ui, &r.id, theme::TEXT_MUTED);
+                                    ui.label(&r.name);
+                                });
+                                ui.label(RichText::new(&r.value).monospace());
                                 status_badge(ui, r.status, 16.0);
                                 ui.add(Label::new(&r.reason).wrap());
                                 source_chip(ui, r.source);
-                                ui.label(&r.last_measured);
+                                ui.label(RichText::new(&r.last_measured).monospace());
                                 ui.end_row();
                             }
                         });
