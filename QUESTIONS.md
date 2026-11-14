@@ -36,3 +36,11 @@ The planner replaces `_pending_` with the answer and, if it is a lasting decisio
 - Options: A) 60 h is intentional (glucose is checked less often): fix the contract.md section 7 sentence and add a glucose `Nominal` assertion to the test. B) Not intentional: ENGINE sets `stale_after_h` to 36 so glucose is `unknown`, and adds the assertion.
 - Proceeding with: A (the code wins, per `docs/contract.md`). The SAFE board shows exactly what `ahc_core::assess` returns.
 - Answer: _pending_
+
+## Q-SAFE-2: What should the safe-mode comms line show?
+- From: SAFE (Claude), branch `egui/status-board-flags`, 2026-11-13
+- Blocks: nothing (SAFE-2 proceeds on the assumption below)
+- Question: B1 asks for a comms line, and the top bar spec says "connected / delayed (with minutes) / blackout". The engine has no comms data yet (time-to-help is ENGINE-7), and safe mode has no API link to test, so it cannot honestly say "connected" or "blackout". The only defined value is `one_way_delay_s` in `ahc.settings.v1` (`docs/architecture.md`: demo default 20 s, labelled as compressed time).
+- Options: A) Show the one-way delay only, from settings (demo default until SAFE-3 reads `ahc.settings.v1`), labelled as compressed demo time; no connected/blackout state. B) Also show connected/blackout, which needs a ground-link check in safe mode (new behaviour, not in any task).
+- Proceeding with: A. "Is waiting for ground safe" stays out of SAFE until ENGINE-7 adds it to `Flag`.
+- Answer: _pending_
