@@ -1,0 +1,18 @@
+[Unit]
+Description=Astronaut Health Companion API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ahc
+WorkingDirectory=/opt/ahc
+EnvironmentFile=/etc/ahc/api.env
+ExecStart=/opt/ahc/target/release/ahc-api
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/ahc
+
+[Install]
+WantedBy=multi-user.target
