@@ -1,7 +1,9 @@
-//! ahc-safe: Safe-Mode Console. B1 status board (SAFE-2).
+//! ahc-safe: Safe-Mode Console. B1 status board (SAFE-2) over the shared event log
+//! (SAFE-3), built natively and as WASM for `/safe/`.
 //! No status logic here: everything comes from `ahc_core::assess`, shaped for
 //! display by `board.rs`.
 mod board;
+mod storage;
 mod theme;
 
 use ahc_core::{assess, demo, registry, AssessInput, Event, Indicator, KitItem, Status};
@@ -9,39 +11,61 @@ use board::{Board, FlagCard, LADDER};
 use eframe::egui::{
     self, pos2, Color32, CornerRadius, Frame, Label, Margin, RichText, Sense, Shape, Stroke, Vec2,
 };
+use storage::{Changes, Settings};
+
+/// How often the board is re-assessed while nothing changes, so staleness and
+/// the clock move on.
+const TICK_S: f64 = 10.0;
 
 struct App {
     events: Vec<Event>,
+    settings: Settings,
     kit: Vec<KitItem>,
     registry: Vec<Indicator>,
-    now_met_s: f64,
+    log_location: String,
+    notice: Option<String>,
+    changes: Changes,
+    was_focused: bool,
+    mission_start_ms: f64,
+    assessed_at: f64,
     board: Board,
 }
 
 impl App {
-    fn new() -> Self {
-        let events = demo::events();
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        theme::apply(&cc.egui_ctx);
+        let loaded = storage::load_events();
+        let settings = storage::load_settings();
         let kit = demo::kit();
         let registry = registry();
-        let now_met_s = demo::NOW_MET_S;
-        let board = Self::assess_board(&events, &kit, &registry, now_met_s);
+        let mission_start_ms = storage::mission_start_ms();
+        let events = loaded.events.unwrap_or_default();
+        let board = Self::assess_board(&events, &settings, &kit, &registry, mission_start_ms);
         Self {
             events,
+            settings,
             kit,
             registry,
-            now_met_s,
+            log_location: storage::location(),
+            notice: loaded.notice,
+            changes: Changes::watch(&cc.egui_ctx),
+            was_focused: true,
+            mission_start_ms,
+            assessed_at: 0.0,
             board,
         }
     }
 
     fn assess_board(
         events: &[Event],
+        settings: &Settings,
         kit: &[KitItem],
         registry: &[Indicator],
-        now_met_s: f64,
+        mission_start_ms: f64,
     ) -> Board {
+        let now_met_s = storage::now_met_s(mission_start_ms, storage::wall_ms(), settings, events);
         let input = AssessInput {
-            crew_id: demo::CREW_ID.into(),
+            crew_id: settings.crew_id.clone(),
             events: events.to_vec(),
             now_met_s,
             kit: kit.to_vec(),
@@ -50,17 +74,45 @@ impl App {
         Board::build(
             &assess(&input),
             registry,
-            demo::CREW_ID,
+            &settings.crew_id,
             events,
             now_met_s,
-            board::DEMO_ONE_WAY_DELAY_S,
+            settings.one_way_delay_s,
         )
     }
 
-    /// Re-run the engine after the log or the clock changes (SAFE-3 and SAFE-4 call this).
-    #[allow(dead_code)]
-    fn reassess(&mut self) {
-        self.board = Self::assess_board(&self.events, &self.kit, &self.registry, self.now_met_s);
+    /// Re-read storage when another tab wrote to it or the window regains focus
+    /// (`apps/egui/AGENTS.md`), and re-assess on a timer.
+    fn refresh(&mut self, ctx: &egui::Context) {
+        let (focused, time) = ctx.input(|i| (i.focused, i.time));
+        let regained_focus = focused && !self.was_focused;
+        self.was_focused = focused;
+        let reload = self.changes.take() || regained_focus;
+        if reload {
+            let loaded = storage::load_events();
+            // An unreadable re-read keeps the last good log on screen, with the notice.
+            if let Some(events) = loaded.events {
+                self.events = events;
+            }
+            self.notice = loaded.notice;
+            self.settings = storage::load_settings();
+            // Keep the current start if none is stored (or it cannot be read), so the
+            // clock never jumps back.
+            if let Some(ms) = storage::stored_mission_start_ms() {
+                self.mission_start_ms = ms;
+            }
+        }
+        if reload || time - self.assessed_at >= TICK_S {
+            self.board = Self::assess_board(
+                &self.events,
+                &self.settings,
+                &self.kit,
+                &self.registry,
+                self.mission_start_ms,
+            );
+            self.assessed_at = time;
+        }
+        ctx.request_repaint_after(std::time::Duration::from_secs_f64(TICK_S));
     }
 }
 
@@ -171,6 +223,7 @@ fn source_chip(ui: &mut egui::Ui, s: ahc_core::SourceStatus) {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        self.refresh(ctx);
         let b = &self.board;
         egui::TopBottomPanel::top("banner")
             .frame(
@@ -206,6 +259,21 @@ impl eframe::App for App {
                     ui.label(RichText::new("Escalation:").color(theme::TEXT_MUTED));
                     ui.label(RichText::new(LADDER[b.escalation_step].1).strong());
                 });
+                ui.add(
+                    Label::new(
+                        RichText::new(format!(
+                            "Log: {} events · {}",
+                            self.events.len(),
+                            self.log_location
+                        ))
+                        .color(theme::TEXT_MUTED)
+                        .small(),
+                    )
+                    .wrap(),
+                );
+                if let Some(notice) = &self.notice {
+                    ui.add(Label::new(RichText::new(notice).strong()).wrap());
+                }
             });
 
         egui::CentralPanel::default()
@@ -268,6 +336,7 @@ impl eframe::App for App {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -280,9 +349,44 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "AHC Safe Mode",
         options,
-        Box::new(|cc| {
-            theme::apply(&cc.egui_ctx);
-            Ok(Box::new(App::new()))
-        }),
+        Box::new(|cc| Ok(Box::new(App::new(cc)))),
     )
+}
+
+/// WASM entry: draws into `#safe_canvas` from `index.html` and replaces the
+/// `#safe_status` loading text, or shows the error there.
+#[cfg(target_arch = "wasm32")]
+fn main() {
+    use wasm_bindgen::JsCast;
+    let document = web_sys::window().and_then(|w| w.document());
+    let status = document
+        .as_ref()
+        .and_then(|d| d.get_element_by_id("safe_status"));
+    let canvas = document
+        .as_ref()
+        .and_then(|d| d.get_element_by_id("safe_canvas"))
+        .and_then(|e| e.dyn_into::<web_sys::HtmlCanvasElement>().ok());
+    let Some(canvas) = canvas else {
+        if let Some(s) = &status {
+            s.set_text_content(Some(
+                "Safe mode could not start: no #safe_canvas on the page.",
+            ));
+        }
+        return;
+    };
+    wasm_bindgen_futures::spawn_local(async move {
+        let started = eframe::WebRunner::new()
+            .start(
+                canvas,
+                eframe::WebOptions::default(),
+                Box::new(|cc| Ok(Box::new(App::new(cc)))),
+            )
+            .await;
+        if let Some(s) = status {
+            match started {
+                Ok(()) => s.remove(),
+                Err(e) => s.set_text_content(Some(&format!("Safe mode could not start: {e:?}"))),
+            }
+        }
+    });
 }
